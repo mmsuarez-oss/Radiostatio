@@ -35,6 +35,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
   const [volume, setVolume] = useState(0.6);
   const [progressMs, setProgressMs] = useState(0);
   const [spinTrigger, setSpinTrigger] = useState(0);
+  const [insertTrigger, setInsertTrigger] = useState(0);
   const controlsRef = useRef<Awaited<ReturnType<typeof createPlayer>> | null>(null);
   const trackRef = useRef<NowPlaying | null>(null);
   const anchorRef = useRef({ position: 0, timestamp: Date.now() });
@@ -85,6 +86,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
   function playAlbum(uri: string) {
     controlsRef.current?.playAlbum(uri);
     if (style === "turntable") setSpinTrigger((s) => s + 1);
+    if (style === "cassette") setInsertTrigger((s) => s + 1);
   }
 
   function applyVolume(next: number) {
@@ -118,12 +120,13 @@ export function Player({ style, onStyleChange }: PlayerProps) {
     <div className="player">
       <StyleSwitcher style={style} onChange={onStyleChange} />
 
-      {style === "turntable" ? (
+      {style === "turntable" && (
         <div className="player__info">
           <p className="player__title">{track?.name ?? "Conecta Spotify"}</p>
           <p className="player__artist">{track?.artists ?? "y dale play desde cualquier dispositivo"}</p>
         </div>
-      ) : (
+      )}
+      {style !== "turntable" && style !== "wheel" && (
         <div className="player__now-playing">
           <div className="player__art">
             {track?.albumArt ? (
@@ -150,7 +153,14 @@ export function Player({ style, onStyleChange }: PlayerProps) {
       </div>
 
       {style === "wheel" && (
-        <Wheel onNext={nextTrack} onPrevious={previousTrack} isPaused={isPaused} onTogglePlay={togglePlay} />
+        <Wheel
+          onNext={nextTrack}
+          onPrevious={previousTrack}
+          isPaused={isPaused}
+          onTogglePlay={togglePlay}
+          trackName={track?.name ?? ""}
+          artist={track?.artists ?? ""}
+        />
       )}
       {style === "turntable" && (
         <Turntable
@@ -173,7 +183,14 @@ export function Player({ style, onStyleChange }: PlayerProps) {
         />
       )}
       {style === "cassette" && (
-        <Cassette onNext={nextTrack} onPrevious={previousTrack} isPaused={isPaused} onTogglePlay={togglePlay} />
+        <Cassette
+          onNext={nextTrack}
+          onPrevious={previousTrack}
+          isPaused={isPaused}
+          onTogglePlay={togglePlay}
+          albumName={track?.albumName ?? ""}
+          insertTrigger={insertTrigger}
+        />
       )}
 
       <p className="player__hint">{HINTS[style]}</p>

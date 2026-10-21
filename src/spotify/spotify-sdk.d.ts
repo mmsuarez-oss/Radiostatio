@@ -3,6 +3,7 @@ declare namespace Spotify {
     name: string;
   }
   interface Album {
+    name: string;
     images: { url: string }[];
   }
   interface Track {

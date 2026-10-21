@@ -1,18 +1,33 @@
+import { useEffect, useState } from "react";
 import "./Cassette.css";
 
 interface CassetteProps {
   isPaused: boolean;
+  albumName: string;
+  insertTrigger: number;
   onNext: () => void;
   onPrevious: () => void;
   onTogglePlay: () => void;
 }
 
-export function Cassette({ isPaused, onNext, onPrevious, onTogglePlay }: CassetteProps) {
+export function Cassette({ isPaused, albumName, insertTrigger, onNext, onPrevious, onTogglePlay }: CassetteProps) {
+  const [inserting, setInserting] = useState(false);
+
+  useEffect(() => {
+    if (insertTrigger === 0) return;
+    setInserting(true);
+    const t = setTimeout(() => setInserting(false), 750);
+    return () => clearTimeout(t);
+  }, [insertTrigger]);
+
   return (
     <div className="cassette">
-      <div className="cassette__shell">
-        <div className={`cassette__reel ${!isPaused ? "cassette__reel--spinning" : ""}`} />
-        <div className={`cassette__reel ${!isPaused ? "cassette__reel--spinning" : ""}`} />
+      <div className={`cassette__shell ${inserting ? "cassette__shell--inserting" : ""}`}>
+        <p className="cassette__label">{albumName || "Mixtape"}</p>
+        <div className="cassette__reels">
+          <div className={`cassette__reel ${!isPaused ? "cassette__reel--spinning" : ""}`} />
+          <div className={`cassette__reel ${!isPaused ? "cassette__reel--spinning" : ""}`} />
+        </div>
       </div>
 
       <div className="cassette__buttons">

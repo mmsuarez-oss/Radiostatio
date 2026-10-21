@@ -4,6 +4,7 @@ import { playContext } from "./library";
 export interface NowPlaying {
   name: string;
   artists: string;
+  albumName: string;
   albumArt: string;
   isPaused: boolean;
   position: number;
@@ -52,6 +53,7 @@ export async function createPlayer(onStateChange: (state: NowPlaying) => void) {
     onStateChange({
       name: track.name,
       artists: track.artists.map((a) => a.name).join(", "),
+      albumName: track.album.name,
       albumArt: track.album.images[0]?.url ?? "",
       isPaused: state.paused,
       position: state.position,

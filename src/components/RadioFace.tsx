@@ -16,7 +16,9 @@ export function RadioFace({ isPaused, volume, onNext, onPrevious, onTogglePlay, 
 
   return (
     <div className="radio-face">
-      <div className="radio-face__grille" aria-hidden="true" />
+      <div className="radio-face__grille" aria-hidden="true">
+        <span className="radio-face__station">RADIOSTATIO · 98.7 FM</span>
+      </div>
 
       <div className="radio-face__controls">
         <div className="rotary-knob">
