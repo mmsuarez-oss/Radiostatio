@@ -1,3 +1,4 @@
+import { playTick } from "../sfx";
 import { useRotaryDrag } from "./useRotaryDrag";
 import "./Wheel.css";
 
@@ -11,7 +12,12 @@ interface WheelProps {
 }
 
 export function Wheel({ onNext, onPrevious, isPaused, onTogglePlay, trackName, artist }: WheelProps) {
-  const { ref, dragging, pulse, handlers } = useRotaryDrag({ onNext, onPrevious, triggerDegrees: 40 });
+  const { ref, dragging, pulse, handlers } = useRotaryDrag({
+    onNext,
+    onPrevious,
+    triggerDegrees: 40,
+    onDetent: playTick,
+  });
 
   return (
     <div className="ipod">

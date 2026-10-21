@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPlayer, type NowPlaying } from "../spotify/player";
+import { setSfxVolume } from "../sfx";
 import { Wheel } from "./Wheel";
 import { Turntable } from "./Turntable";
 import { RadioFace } from "./RadioFace";
@@ -125,6 +126,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
   function applyVolume(next: number) {
     controlsRef.current?.setVolume(next);
+    setSfxVolume(next);
     setVolume(next);
   }
 
@@ -163,13 +165,16 @@ export function Player({ style, onStyleChange }: PlayerProps) {
       )}
       {style !== "turntable" && style !== "wheel" && (
         <div className="player__now-playing">
-          <div className="player__art">
-            {track?.albumArt ? (
-              <img src={track.albumArt} alt="" />
-            ) : (
-              <div className="player__art-placeholder" aria-hidden="true" />
-            )}
-          </div>
+          {/* El casete ya lleva la portada en la etiqueta de la cinta */}
+          {style === "radio" && (
+            <div className="player__art">
+              {track?.albumArt ? (
+                <img src={track.albumArt} alt="" />
+              ) : (
+                <div className="player__art-placeholder" aria-hidden="true" />
+              )}
+            </div>
+          )}
           <div className="player__info player__info--left">
             <p className="player__title">{track?.name ?? "Conecta Spotify"}</p>
             <p className="player__artist">{track?.artists ?? "y dale play desde cualquier dispositivo"}</p>

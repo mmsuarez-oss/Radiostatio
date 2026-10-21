@@ -19,14 +19,29 @@ interface SpotifyPlaylistItem {
   images: { url: string }[] | null;
 }
 
+// ponytail: tope de 300 items por lista; si alguien tiene una biblioteca más
+// grande que eso, la estantería va a pedir virtualizar antes que más páginas.
+const MAX_ITEMS = 300;
+
+/** Sigue el `next` de Spotify: una sola página se quedaba en 20 discos. */
+async function fetchAllPages<T>(url: string): Promise<T[]> {
+  const items: T[] = [];
+  let next: string | null = url;
+  while (next && items.length < MAX_ITEMS) {
+    // Dentro del loop: una biblioteca grande puede cruzar el vencimiento del token.
+    const token = await getValidAccessToken();
+    const res: Response = await fetch(next, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`Spotify request failed: ${res.status} (${next})`);
+    const json = await res.json();
+    items.push(...(json.items as T[]));
+    next = json.next;
+  }
+  return items;
+}
+
 export async function getSavedAlbums(): Promise<LibraryItem[]> {
-  const token = await getValidAccessToken();
-  const res = await fetch("https://api.spotify.com/v1/me/albums?limit=20", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error(`Failed to load saved albums: ${res.status}`);
-  const json = await res.json();
-  return (json.items as SpotifyAlbumItem[])
+  const items = await fetchAllPages<SpotifyAlbumItem>("https://api.spotify.com/v1/me/albums?limit=50");
+  return items
     .filter((item) => item.album)
     .map((item) => ({
       uri: item.album!.uri,
@@ -38,13 +53,8 @@ export async function getSavedAlbums(): Promise<LibraryItem[]> {
 }
 
 export async function getOwnPlaylists(): Promise<LibraryItem[]> {
-  const token = await getValidAccessToken();
-  const res = await fetch("https://api.spotify.com/v1/me/playlists?limit=20", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error(`Failed to load playlists: ${res.status}`);
-  const json = await res.json();
-  return (json.items as (SpotifyPlaylistItem | null)[])
+  const items = await fetchAllPages<SpotifyPlaylistItem | null>("https://api.spotify.com/v1/me/playlists?limit=50");
+  return items
     .filter((playlist): playlist is SpotifyPlaylistItem => !!playlist)
     .map((playlist) => ({
       uri: playlist.uri,

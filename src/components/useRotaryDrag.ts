@@ -5,9 +5,18 @@ interface RotaryDragOptions {
   onNext: () => void;
   onPrevious: () => void;
   triggerDegrees?: number;
+  /** Muesca mecánica: suena bastante más seguido que el cambio de canción. */
+  onDetent?: () => void;
+  detentDegrees?: number;
 }
 
-export function useRotaryDrag({ onNext, onPrevious, triggerDegrees = 40 }: RotaryDragOptions) {
+export function useRotaryDrag({
+  onNext,
+  onPrevious,
+  triggerDegrees = 40,
+  onDetent,
+  detentDegrees = 10,
+}: RotaryDragOptions) {
   const ref = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [pulse, setPulse] = useState(0);
@@ -15,6 +24,7 @@ export function useRotaryDrag({ onNext, onPrevious, triggerDegrees = 40 }: Rotar
   const lastAngle = useRef(0);
   const totalDelta = useRef(0);
   const firedSinceStart = useRef(0);
+  const detentsSinceStart = useRef(0);
 
   function handlePointerDown(e: React.PointerEvent) {
     const el = ref.current;
@@ -23,6 +33,7 @@ export function useRotaryDrag({ onNext, onPrevious, triggerDegrees = 40 }: Rotar
     lastAngle.current = angleFromCenter(rect.left + rect.width / 2, rect.top + rect.height / 2, e.clientX, e.clientY);
     totalDelta.current = 0;
     firedSinceStart.current = 0;
+    detentsSinceStart.current = 0;
     setDragging(true);
     el.setPointerCapture(e.pointerId);
   }
@@ -40,6 +51,14 @@ export function useRotaryDrag({ onNext, onPrevious, triggerDegrees = 40 }: Rotar
     lastAngle.current = current;
     totalDelta.current += step;
     setRotation(totalDelta.current);
+
+    if (onDetent) {
+      const detents = Math.trunc(totalDelta.current / detentDegrees);
+      if (detents !== detentsSinceStart.current) {
+        detentsSinceStart.current = detents;
+        onDetent();
+      }
+    }
 
     const steps = Math.trunc(totalDelta.current / triggerDegrees);
     let diff = steps - firedSinceStart.current;

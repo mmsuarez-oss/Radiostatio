@@ -3,6 +3,14 @@
 const elements = new Map<string, HTMLAudioElement>();
 const stopTimers = new Map<string, number>();
 
+// Los efectos siguen el volumen del reproductor: bajar la música y que el
+// casete siga sonando igual de fuerte es lo que más molesta.
+let master = 0.6;
+
+export function setSfxVolume(value: number) {
+  master = value;
+}
+
 export type SfxName = "cassette-eject" | "cassette-insert" | "cassette-close" | "vinyl-stop" | "radio-static";
 
 interface SfxOptions {
@@ -24,7 +32,7 @@ export function playSfx(name: SfxName, { volume = 0.55, from = 0, durationMs }: 
   const timer = stopTimers.get(name);
   if (timer) clearTimeout(timer);
 
-  el.volume = volume;
+  el.volume = Math.min(1, Math.max(0, volume * master));
   // Un disparo nuevo pisa al anterior; sin el pause() el seek sobre un audio
   // que ya está sonando no siempre reinicia en Safari.
   el.pause();
@@ -47,6 +55,24 @@ export function playSfx(name: SfxName, { volume = 0.55, from = 0, durationMs }: 
       }, durationMs),
     );
   }
+}
+
+/** Click seco de la rueda. Sintetizado: un mp3 de 30 ms no vale la descarga. */
+let audioCtx: AudioContext | null = null;
+
+export function playTick() {
+  if (master === 0) return;
+  audioCtx ??= new AudioContext();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.value = 1900;
+  gain.gain.setValueAtTime(0.09 * master, now);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.028);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.03);
 }
 
 /** Trozo al azar del clip largo de sintonía, para que no suene siempre igual. */
