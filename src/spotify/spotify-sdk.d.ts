@@ -3,10 +3,12 @@ declare namespace Spotify {
     name: string;
   }
   interface Album {
+    uri: string;
     name: string;
     images: { url: string }[];
   }
   interface Track {
+    uri: string;
     name: string;
     artists: Artist[];
     album: Album;
@@ -15,6 +17,7 @@ declare namespace Spotify {
     paused: boolean;
     position: number;
     duration: number;
+    shuffle: boolean;
     track_window: { current_track: Track };
   }
   interface PlayerInit {

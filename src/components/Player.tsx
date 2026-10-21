@@ -6,7 +6,7 @@ import { RadioFace } from "./RadioFace";
 import { Cassette } from "./Cassette";
 import { VolumeSlider } from "./VolumeSlider";
 import { StyleSwitcher, type PlayerStyle } from "./StyleSwitcher";
-import { LibraryShelf } from "./LibraryShelf";
+import { LibraryPanel } from "./LibraryPanel";
 import "./Player.css";
 
 const VOLUME_STEP = 0.1;
@@ -100,16 +100,29 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
   // On mobile, tapping two covers in quick succession (or a fat-finger hitting the
   // neighboring one) fired two overlapping /play requests — the device bounced between
-  // both contexts, flashing through several tracks before settling. One in flight at a time.
-  async function playAlbum(uri: string) {
+  // both contexts, flashing through several tracks before settling. One in flight at a time,
+  // for track picks as well as album picks.
+  async function withSelectionLock(run: () => Promise<void> | undefined) {
     if (selectingRef.current) return;
     selectingRef.current = true;
     try {
-      await controlsRef.current?.playAlbum(uri);
-      if (style === "turntable" || style === "cassette") pendingAnimRef.current = style;
+      await run();
     } finally {
       selectingRef.current = false;
     }
+  }
+
+  function playAlbum(uri: string) {
+    return withSelectionLock(async () => {
+      await controlsRef.current?.playAlbum(uri);
+      if (style === "turntable" || style === "cassette") pendingAnimRef.current = style;
+    });
+  }
+
+  function playTrack(trackUri: string) {
+    const albumUri = trackRef.current?.albumUri;
+    if (!albumUri) return;
+    return withSelectionLock(() => controlsRef.current?.playTrack(albumUri, trackUri));
   }
 
   function applyVolume(next: number) {
@@ -138,6 +151,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
   const progressPct = track?.duration ? Math.min(100, (progressMs / track.duration) * 100) : 0;
   const isPaused = track?.isPaused ?? true;
+  const shuffle = track?.shuffle ?? false;
 
   return (
     <div className="player">
@@ -218,9 +232,30 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
       <p className="player__hint">{HINTS[style]}</p>
 
+      <button
+        className={`player__shuffle ${shuffle ? "player__shuffle--on" : ""}`}
+        onClick={() => controlsRef.current?.setShuffle(!shuffle)}
+        aria-pressed={shuffle}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path
+            d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"
+            fill="currentColor"
+          />
+        </svg>
+        Aleatorio
+      </button>
+
       {style !== "radio" && <VolumeSlider value={volume} onChange={applyVolume} />}
 
-      <LibraryShelf style={style} onSelect={playAlbum} />
+      <LibraryPanel
+        style={style}
+        albumUri={track?.albumUri ?? ""}
+        albumName={track?.albumName ?? ""}
+        currentTrackUri={track?.trackUri ?? ""}
+        onSelectAlbum={playAlbum}
+        onSelectTrack={playTrack}
+      />
     </div>
   );
 }

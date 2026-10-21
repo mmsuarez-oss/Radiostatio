@@ -67,6 +67,46 @@ export async function getLibraryItems(): Promise<LibraryItem[]> {
   return items;
 }
 
+export interface AlbumTrack {
+  uri: string;
+  name: string;
+  artists: string;
+  durationMs: number;
+}
+
+interface SpotifyTrackItem {
+  uri: string;
+  name: string;
+  duration_ms: number;
+  artists: { name: string }[];
+}
+
+export async function getAlbumTracks(albumUri: string): Promise<AlbumTrack[]> {
+  const id = albumUri.split(":").pop();
+  const token = await getValidAccessToken();
+  const res = await fetch(`https://api.spotify.com/v1/albums/${id}/tracks?limit=50`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`Failed to load album tracks: ${res.status}`);
+  const json = await res.json();
+  return (json.items as SpotifyTrackItem[]).map((t) => ({
+    uri: t.uri,
+    name: t.name,
+    artists: t.artists.map((a) => a.name).join(", "),
+    durationMs: t.duration_ms,
+  }));
+}
+
+// Plays one track but keeps the album as context, so the rest of it follows on.
+export async function playTrackInAlbum(albumUri: string, trackUri: string, deviceId: string) {
+  const token = await getValidAccessToken();
+  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ context_uri: albumUri, offset: { uri: trackUri } }),
+  });
+}
+
 export async function playContext(contextUri: string, deviceId: string) {
   const token = await getValidAccessToken();
   await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {

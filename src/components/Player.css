@@ -104,6 +104,28 @@
   color: var(--text-faint, #707072);
 }
 
+.player__shuffle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 20px;
+  background: var(--surface-2, #232325);
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08));
+  color: var(--text-muted, #a7a7a7);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.player__shuffle--on {
+  background: var(--accent, #e3b765);
+  box-shadow: none;
+  color: #1a1308;
+}
+
 @media (max-height: 700px) {
   .player {
     gap: 10px;

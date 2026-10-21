@@ -25,8 +25,39 @@ export function Wheel({ onNext, onPrevious, isPaused, onTogglePlay, trackName, a
         {pulse > 0 && <span key={pulse} className="wheel__pulse" />}
         <div className="wheel__ticks" aria-hidden="true" />
         <span className="wheel__label wheel__label--top">MENU</span>
-        <span className="wheel__label wheel__label--left">⏮</span>
-        <span className="wheel__label wheel__label--right">⏭</span>
+        <button
+          className="wheel__label wheel__label--left"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPrevious();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label="Canción anterior"
+        >
+          ⏮
+        </button>
+        <button
+          className="wheel__label wheel__label--right"
+          onClick={(e) => {
+            e.stopPropagation();
+            onNext();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label="Siguiente canción"
+        >
+          ⏭
+        </button>
+        <button
+          className="wheel__label wheel__label--bottom"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePlay();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label="Reproducir / Pausar"
+        >
+          ▶❚❚
+        </button>
         <button
           className="wheel__play"
           onClick={(e) => {

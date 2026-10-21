@@ -7,24 +7,63 @@
   perspective: 700px;
 }
 
+/* Blue moulded-plastic body, after the QFX portable recorder: glossy top edge,
+   smoked tape window on the left, perforated speaker on the right. */
 .cassette__shell {
+  position: relative;
+  overflow: hidden;
+  /* No global border-box reset in this project, and the padding below is in % */
+  box-sizing: border-box;
   width: 100%;
-  height: 130px;
+  height: 150px;
   border-radius: 10px;
-  background: linear-gradient(170deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.18)), var(--surface-2, #232325);
+  background: linear-gradient(165deg, #3d7fd0 0%, #1f5aa8 38%, #143d75 100%);
   box-shadow:
-    inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-    0 10px 20px rgba(0, 0, 0, 0.35);
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.45),
+    0 10px 20px rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  padding: 10px 0;
+  padding: 10px 36% 48px 5%;
   transform-origin: top center;
   transition: transform 0.25s ease;
+}
+
+/* Smoked door the label and reels sit behind */
+.cassette__shell::before {
+  content: "";
+  position: absolute;
+  left: 5%;
+  right: 36%;
+  top: 12px;
+  bottom: 48px;
+  border-radius: 4px;
+  background: linear-gradient(160deg, rgba(12, 16, 24, 0.92), rgba(22, 28, 42, 0.86));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 3px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Perforated speaker */
+.cassette__shell::after {
+  content: "";
+  position: absolute;
+  right: 5%;
+  top: 14px;
+  bottom: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: #16406f;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.6) 1.1px, transparent 1.3px);
+  background-size: 6px 6px;
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+    inset 0 2px 7px rgba(0, 0, 0, 0.55),
+    0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .cassette__shell:hover {
@@ -98,24 +137,24 @@
   text-overflow: ellipsis;
 }
 
+/* Positioned so it paints above the smoked door, which is absolutely positioned */
 .cassette__reels {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 34px;
 }
 
 .cassette__reel {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  background:
-    repeating-conic-gradient(var(--text-faint, #707072) 0deg 4deg, transparent 4deg 45deg);
+  background: repeating-conic-gradient(#c8ccd4 0deg 8deg, transparent 8deg 60deg);
   box-shadow:
-    inset 0 0 0 8px var(--surface-2, #232325),
-    inset 0 0 0 9px var(--border, rgba(255, 255, 255, 0.1)),
-    inset 0 2px 6px rgba(0, 0, 0, 0.45),
-    0 1px 0 rgba(255, 255, 255, 0.07);
+    inset 0 0 0 7px #2a2f3a,
+    inset 0 0 0 8px rgba(255, 255, 255, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .cassette__reel--spinning {
@@ -128,61 +167,63 @@
   }
 }
 
-.cassette__buttons {
+/* Mechanical transport keys along the bottom of the body */
+.cassette__keys {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 10px;
   display: flex;
-  align-items: center;
-  gap: 14px;
+  gap: 6px;
 }
 
-.cassette__button {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.cassette__key {
+  flex: 1;
+  height: 30px;
   border: none;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--surface-2, #232325) 100%, white 6%), var(--surface-2, #232325));
-  color: var(--text, #ffffff);
-  box-shadow:
-    inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 3px 6px rgba(0, 0, 0, 0.3);
+  border-radius: 2px 2px 4px 4px;
+  background: linear-gradient(180deg, #4a4f58 0%, #2b2f36 55%, #1a1d22 100%);
+  color: #d8dce4;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  /* The flat 0 3px 0 is the key's side wall — it collapses on press */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.5),
+    0 3px 0 #0f1115,
+    0 4px 6px rgba(0, 0, 0, 0.45);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
 }
 
-.cassette__button:active {
-  transform: translateY(1px) scale(0.96);
-  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)), 0 1px 2px rgba(0, 0, 0, 0.3);
+.cassette__key:active {
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.5),
+    0 0 0 #0f1115,
+    0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
-.cassette__button--accent {
-  width: 56px;
-  height: 56px;
-  background: radial-gradient(circle at 32% 26%, #fbe6b4 0%, var(--accent, #e3b765) 52%, #b98847 100%);
+.cassette__key--play {
+  flex: 1.3;
+  background: linear-gradient(180deg, #f0d49a 0%, var(--accent, #e3b765) 55%, #b98847 100%);
   color: #1a1308;
   box-shadow:
-    inset 0 2px 1px rgba(255, 255, 255, 0.55),
-    inset 0 -4px 6px rgba(0, 0, 0, 0.22),
-    0 8px 16px rgba(0, 0, 0, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.25),
+    0 3px 0 #7d5a2b,
+    0 4px 6px rgba(0, 0, 0, 0.45);
 }
 
-.cassette__button--accent svg {
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
-}
-
-.cassette__button--accent:hover {
-  filter: brightness(1.04);
-}
-
-.cassette__button--accent:active {
-  transform: translateY(2px) scale(0.97);
+.cassette__key--play:active {
+  transform: translateY(3px);
   box-shadow:
-    inset 0 2px 1px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.25),
-    0 3px 6px rgba(0, 0, 0, 0.35);
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.25),
+    0 0 0 #7d5a2b,
+    0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 @media (max-height: 700px) {
@@ -191,7 +232,20 @@
   }
 
   .cassette__shell {
-    height: 100px;
+    height: 124px;
+    padding-bottom: 44px;
+  }
+
+  .cassette__shell::before {
+    bottom: 44px;
+  }
+
+  .cassette__shell::after {
+    bottom: 46px;
+  }
+
+  .cassette__key {
+    height: 26px;
   }
 
   .cassette__reel {

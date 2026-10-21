@@ -7,10 +7,7 @@
   grid-auto-rows: min-content;
   gap: 26px 20px;
   justify-items: center;
-  max-height: 270px;
-  overflow-y: auto;
   padding: 10px 6px;
-  scrollbar-width: thin;
 }
 
 /* Tapes are wide rectangles — three per row leaves them letterbox-thin. */

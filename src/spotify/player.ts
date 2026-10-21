@@ -1,12 +1,15 @@
 import { getValidAccessToken } from "./auth";
-import { playContext } from "./library";
+import { playContext, playTrackInAlbum } from "./library";
 
 export interface NowPlaying {
   name: string;
   artists: string;
   albumName: string;
   albumArt: string;
+  albumUri: string;
+  trackUri: string;
   isPaused: boolean;
+  shuffle: boolean;
   position: number;
   duration: number;
 }
@@ -36,6 +39,14 @@ async function callPlayerApi(path: string, deviceId: string) {
   });
 }
 
+async function setShuffle(state: boolean, deviceId: string) {
+  const token = await getValidAccessToken();
+  await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=${state}&device_id=${deviceId}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export async function createPlayer(onStateChange: (state: NowPlaying) => void) {
   await loadSdkScript();
 
@@ -55,7 +66,10 @@ export async function createPlayer(onStateChange: (state: NowPlaying) => void) {
       artists: track.artists.map((a) => a.name).join(", "),
       albumName: track.album.name,
       albumArt: track.album.images[0]?.url ?? "",
+      albumUri: track.album.uri,
+      trackUri: track.uri,
       isPaused: state.paused,
+      shuffle: state.shuffle,
       position: state.position,
       duration: state.duration,
     });
@@ -86,5 +100,7 @@ export async function createPlayer(onStateChange: (state: NowPlaying) => void) {
     togglePlay: () => player.togglePlay(),
     setVolume: (volume: number) => player.setVolume(volume),
     playAlbum: (uri: string) => playContext(uri, deviceId),
+    playTrack: (albumUri: string, trackUri: string) => playTrackInAlbum(albumUri, trackUri, deviceId),
+    setShuffle: (state: boolean) => setShuffle(state, deviceId),
   };
 }
