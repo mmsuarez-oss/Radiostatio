@@ -1,84 +1,68 @@
-/* Walnut plinth with a woven grille, after the belt-drive suitcase decks */
+/* Plinto negro mate, de los que vienen con Bluetooth y brazo en S: nada de
+   madera ni tela, todo canto recto y plástico texturado. */
 .turntable {
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  height: 218px;
+  height: 206px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background:
-    repeating-linear-gradient(2deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 9px),
-    linear-gradient(165deg, #a9763f 0%, #8a5a2d 45%, #6b431f 100%);
+    radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(172deg, #2a2a2d 0%, #202023 55%, #151517 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 220, 170, 0.35),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
-    0 10px 22px rgba(0, 0, 0, 0.45);
-  perspective: 500px;
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
+    0 10px 22px rgba(0, 0, 0, 0.55);
 }
 
-/* Woven speaker cloth */
+/* Canto inferior del gabinete, el borde biselado del frente */
 .turntable::after {
   content: "";
   position: absolute;
-  left: 14px;
-  right: 86px;
-  bottom: 12px;
-  height: 50px;
-  border-radius: 3px;
-  background-color: #c8a371;
-  background-image:
-    radial-gradient(rgba(60, 38, 16, 0.75) 0.9px, transparent 1px),
-    radial-gradient(rgba(60, 38, 16, 0.75) 0.9px, transparent 1px);
-  background-size: 5px 5px, 5px 5px;
-  background-position: 0 0, 2.5px 2.5px;
-  box-shadow: inset 0 0 0 2px rgba(60, 38, 16, 0.5), inset 0 2px 5px rgba(0, 0, 0, 0.45);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 10px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.15));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-/* Transport control on the plinth, where a real deck puts it — not on the platter */
-.turntable__play {
+.turntable__brand {
   position: absolute;
-  right: 24px;
-  bottom: 18px;
-  width: 38px;
-  height: 38px;
+  top: 12px;
+  left: 16px;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Plato: goma negra con el aro de aluminio asomando por debajo */
+.turntable__platter {
+  position: absolute;
+  top: 26px;
+  left: 18px;
+  width: 152px;
+  height: 152px;
   border-radius: 50%;
-  border: none;
-  background: radial-gradient(circle at 32% 26%, #fbe6b4 0%, var(--accent, #e3b765) 52%, #b98847 100%);
-  color: #1a1308;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  background: radial-gradient(circle at 50% 50%, #1a1a1c 0 92%, #b9bcc2 93% 100%);
   box-shadow:
-    inset 0 2px 1px rgba(255, 255, 255, 0.55),
-    inset 0 -3px 5px rgba(0, 0, 0, 0.22),
-    0 4px 9px rgba(0, 0, 0, 0.5);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.turntable__play:hover {
-  filter: brightness(1.04);
-}
-
-.turntable__play:active {
-  transform: translateY(2px) scale(0.96);
-  box-shadow:
-    inset 0 2px 1px rgba(255, 255, 255, 0.4),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.25),
-    0 2px 4px rgba(0, 0, 0, 0.45);
+    0 0 0 1px rgba(0, 0, 0, 0.7),
+    0 6px 16px rgba(0, 0, 0, 0.55);
 }
 
 .turntable__record {
-  position: absolute;
-  top: 10px;
-  left: calc(50% - 66px);
+  position: relative;
   width: 132px;
   height: 132px;
   border-radius: 50%;
-  position: relative;
   overflow: hidden;
-  background: var(--surface-2, #232325);
-  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)), 0 6px 16px rgba(0, 0, 0, 0.3);
+  background: #0d0d0f;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
   cursor: pointer;
   touch-action: none;
   user-select: none;
@@ -182,58 +166,157 @@
   }
 }
 
+/* Brazo: contrapeso atrás, tubo cromado y cápsula al final */
 .turntable__arm {
   position: absolute;
-  top: 2px;
-  right: 30px;
-  width: 90px;
-  height: 120px;
+  top: 30px;
+  right: 26px;
+  width: 70px;
+  height: 130px;
   pointer-events: none;
 }
 
-/* Pivot block the arm swings from */
+/* Base del pivote */
 .turntable__arm::before {
   content: "";
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 18px;
-  height: 18px;
+  top: 14px;
+  right: 0;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #9ba0a8 0%, #5e636b 50%, #303339 100%);
+  background: radial-gradient(circle at 34% 28%, #8f949c 0%, #4c5159 55%, #26282d 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 2px 4px rgba(0, 0, 0, 0.55);
+    0 2px 5px rgba(0, 0, 0, 0.6);
 }
 
-.turntable__arm-head {
+.turntable__counterweight {
   position: absolute;
-  top: 10px;
+  top: 0;
+  right: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #45494f 0%, #1e2024 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.turntable__arm-tube {
+  position: absolute;
+  top: 22px;
   right: 10px;
-  width: 4px;
-  height: 90px;
+  width: 3px;
+  height: 92px;
   border-radius: 2px;
-  background: linear-gradient(90deg, #6e737b 0%, #c2c6cc 45%, #70757d 100%);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  background: linear-gradient(90deg, #4e535a 0%, #a8aeb7 45%, #51565e 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   transform-origin: top center;
-  /* Parked beside the platter; swings onto the record while playing */
+  /* Descansando al costado del plato; baja sobre el disco al reproducir */
   transform: rotate(6deg);
   transition: transform 0.9s cubic-bezier(0.45, 0, 0.25, 1);
 }
 
-.turntable__arm--playing .turntable__arm-head {
+.turntable__arm--playing .turntable__arm-tube {
   transform: rotate(40deg);
 }
 
-/* Headshell at the business end */
-.turntable__arm-head::after {
-  content: "";
+/* Cápsula: el codo del brazo en S y la pastilla */
+.turntable__headshell {
   position: absolute;
-  bottom: -6px;
-  left: -5px;
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  background: linear-gradient(160deg, #3a3d43 0%, #1b1d21 100%);
+  bottom: -8px;
+  left: -6px;
+  width: 15px;
+  height: 15px;
+  border-radius: 2px 2px 3px 3px;
+  background: linear-gradient(160deg, #3d4147 0%, #16181c 100%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  transform: rotate(-16deg);
+}
+
+/* Botonera del frente derecho */
+.turntable__controls {
+  position: absolute;
+  right: 18px;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.turntable__speed {
+  width: 26px;
+  height: 20px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #34383d 0%, #1b1d21 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 3px rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.turntable__play {
+  width: 34px;
+  height: 26px;
+  border: none;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f0d49a 0%, var(--accent, #e3b765) 55%, #b98847 100%);
+  color: #1a1308;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 4px rgba(0, 0, 0, 0.55);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.turntable__play:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Led de encendido del frente izquierdo */
+.turntable__power {
+  position: absolute;
+  left: 20px;
+  bottom: 26px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 30%, #6a7079 0%, #2d3036 60%, #16181b 100%);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-height: 760px) {
+  .turntable {
+    height: 186px;
+  }
+
+  .turntable__platter {
+    top: 20px;
+    width: 136px;
+    height: 136px;
+  }
+
+  .turntable__record {
+    width: 118px;
+    height: 118px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turntable__record--spinning,
+  .turntable__record--selecting,
+  .turntable__pulse {
+    animation: none;
+  }
 }
