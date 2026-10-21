@@ -3,7 +3,7 @@ import { createPlayer, type NowPlaying } from "../spotify/player";
 import { setSfxVolume } from "../sfx";
 import { Wheel } from "./Wheel";
 import { Turntable } from "./Turntable";
-import { RadioFace } from "./RadioFace";
+import { CdPlayer } from "./CdPlayer";
 import { Cassette } from "./Cassette";
 import { VolumeSlider } from "./VolumeSlider";
 import { StyleSwitcher, type PlayerStyle } from "./StyleSwitcher";
@@ -15,7 +15,7 @@ const VOLUME_STEP = 0.1;
 const HINTS: Record<PlayerStyle, string> = {
   wheel: "Gira para cambiar de canción",
   turntable: "Gira el disco para cambiar de canción",
-  radio: "Gira la perilla para sintonizar",
+  cd: "Gira el disco para cambiar de pista",
   cassette: "Usa los botones para avanzar",
 };
 
@@ -118,10 +118,11 @@ export function Player({ style, onStyleChange }: PlayerProps) {
     });
   }
 
-  function playTrack(trackUri: string) {
-    const albumUri = trackRef.current?.albumUri;
-    if (!albumUri) return;
-    return withSelectionLock(() => controlsRef.current?.playTrack(albumUri, trackUri));
+  // El álbum viene de la búsqueda; sin él, el del disco que está sonando.
+  function playTrack(trackUri: string, albumUri?: string) {
+    const context = albumUri ?? trackRef.current?.albumUri;
+    if (!context) return;
+    return withSelectionLock(() => controlsRef.current?.playTrack(context, trackUri));
   }
 
   function applyVolume(next: number) {
@@ -163,18 +164,10 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           <p className="player__artist">{track?.artists ?? "y dale play desde cualquier dispositivo"}</p>
         </div>
       )}
-      {style !== "turntable" && style !== "wheel" && (
+      {/* El casete lleva la portada en la etiqueta y el CD en el visor: acá va
+          solo el texto, que ninguno de los dos muestra completo. */}
+      {style === "cassette" && (
         <div className="player__now-playing">
-          {/* El casete ya lleva la portada en la etiqueta de la cinta */}
-          {style === "radio" && (
-            <div className="player__art">
-              {track?.albumArt ? (
-                <img src={track.albumArt} alt="" />
-              ) : (
-                <div className="player__art-placeholder" aria-hidden="true" />
-              )}
-            </div>
-          )}
           <div className="player__info player__info--left">
             <p className="player__title">{track?.name ?? "Conecta Spotify"}</p>
             <p className="player__artist">{track?.artists ?? "y dale play desde cualquier dispositivo"}</p>
@@ -212,14 +205,15 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           spinTrigger={spinTrigger}
         />
       )}
-      {style === "radio" && (
-        <RadioFace
+      {style === "cd" && (
+        <CdPlayer
           onNext={nextTrack}
           onPrevious={previousTrack}
           isPaused={isPaused}
           onTogglePlay={togglePlay}
-          volume={volume}
-          onVolumeChange={applyVolume}
+          albumArt={track?.albumArt ?? ""}
+          trackName={track?.name ?? ""}
+          artist={track?.artists ?? ""}
           trackUri={track?.trackUri ?? ""}
         />
       )}
@@ -251,7 +245,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
         Aleatorio
       </button>
 
-      {style !== "radio" && <VolumeSlider value={volume} onChange={applyVolume} />}
+      <VolumeSlider value={volume} onChange={applyVolume} />
 
       <LibraryPanel
         style={style}

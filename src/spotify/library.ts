@@ -107,6 +107,61 @@ export async function getAlbumTracks(albumUri: string): Promise<AlbumTrack[]> {
   }));
 }
 
+export interface SearchTrack extends AlbumTrack {
+  /** Contexto con el que se reproduce: así sigue el resto del disco. */
+  albumUri: string;
+  image: string;
+}
+
+interface SpotifySearchAlbum {
+  uri: string;
+  name: string;
+  artists: { name: string }[];
+  images: { url: string }[];
+}
+
+interface SpotifySearchTrack extends SpotifyTrackItem {
+  album: { uri: string; images: { url: string }[] };
+}
+
+/** Busca en todo el catálogo de Spotify, no solo en lo guardado. */
+export async function searchCatalog(
+  query: string,
+  signal?: AbortSignal,
+): Promise<{ albums: LibraryItem[]; tracks: SearchTrack[] }> {
+  const token = await getValidAccessToken();
+  const res = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album,track&limit=9`,
+    { headers: { Authorization: `Bearer ${token}` }, signal },
+  );
+  if (!res.ok) throw new Error(`Spotify search failed: ${res.status}`);
+  const json = await res.json();
+
+  // Spotify devuelve huecos nulos en los resultados cada tanto.
+  const albums = ((json.albums?.items ?? []) as (SpotifySearchAlbum | null)[])
+    .filter((album): album is SpotifySearchAlbum => !!album)
+    .map((album) => ({
+      uri: album.uri,
+      name: album.name,
+      subtitle: album.artists.map((a) => a.name).join(", "),
+      image: album.images[0]?.url ?? "",
+      kind: "album" as const,
+    }));
+
+  const tracks = ((json.tracks?.items ?? []) as (SpotifySearchTrack | null)[])
+    .filter((track): track is SpotifySearchTrack => !!track)
+    .map((track) => ({
+      uri: track.uri,
+      name: track.name,
+      artists: track.artists.map((a) => a.name).join(", "),
+      durationMs: track.duration_ms,
+      albumUri: track.album.uri,
+      image: track.album.images.at(-1)?.url ?? "",
+    }));
+
+  return { albums, tracks };
+}
+
 // Plays one track but keeps the album as context, so the rest of it follows on.
 export async function playTrackInAlbum(albumUri: string, trackUri: string, deviceId: string) {
   const token = await getValidAccessToken();

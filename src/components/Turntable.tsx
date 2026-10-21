@@ -42,6 +42,10 @@ export function Turntable({ albumArt, isPaused, onNext, onPrevious, onTogglePlay
         {pulse > 0 && <span key={pulse} className="turntable__pulse" />}
         {albumArt && <img src={albumArt} alt="" draggable={false} />}
         <div className="turntable__grooves" aria-hidden="true" />
+        {/* Grabado a mano en el lacre, como en los vinilos de verdad */}
+        <span className="turntable__etching" aria-hidden="true">
+          GRACE
+        </span>
         <span className="turntable__spindle" aria-hidden="true" />
       </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getAlbumTracks, type AlbumTrack } from "../spotify/library";
 import { LibraryShelf } from "./LibraryShelf";
+import { LibrarySearch } from "./LibrarySearch";
 import type { PlayerStyle } from "./StyleSwitcher";
 import "./LibraryPanel.css";
 
@@ -10,7 +11,7 @@ interface LibraryPanelProps {
   albumName: string;
   currentTrackUri: string;
   onSelectAlbum: (uri: string) => void;
-  onSelectTrack: (trackUri: string) => void;
+  onSelectTrack: (trackUri: string, albumUri?: string) => void;
 }
 
 function formatDuration(ms: number) {
@@ -26,7 +27,7 @@ export function LibraryPanel({
   onSelectAlbum,
   onSelectTrack,
 }: LibraryPanelProps) {
-  const [tab, setTab] = useState<"tracks" | "albums">("tracks");
+  const [tab, setTab] = useState<"tracks" | "albums" | "search">("tracks");
   const [tracks, setTracks] = useState<AlbumTrack[]>([]);
   const [error, setError] = useState(false);
 
@@ -62,9 +63,21 @@ export function LibraryPanel({
         >
           Álbumes
         </button>
+        <button
+          role="tab"
+          aria-selected={tab === "search"}
+          className={`library-panel__tab ${tab === "search" ? "library-panel__tab--active" : ""}`}
+          onClick={() => setTab("search")}
+        >
+          Buscar
+        </button>
       </div>
 
-      {tab === "tracks" ? (
+      {tab === "search" && (
+        <LibrarySearch style={style} onSelectAlbum={onSelectAlbum} onSelectTrack={onSelectTrack} />
+      )}
+
+      {tab === "tracks" && (
         <div className="library-panel__tracks">
           {albumName && <p className="library-panel__album">{albumName}</p>}
           {error && <p className="library-panel__empty">No se pudieron cargar las canciones</p>}
@@ -84,9 +97,9 @@ export function LibraryPanel({
             </button>
           ))}
         </div>
-      ) : (
-        <LibraryShelf style={style} onSelect={onSelectAlbum} />
       )}
+
+      {tab === "albums" && <LibraryShelf style={style} onSelect={onSelectAlbum} />}
     </details>
   );
 }

@@ -16,7 +16,9 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => !!getStoredToken());
   const [ready, setReady] = useState(false);
   const [theme, setTheme] = usePersistedState<string>("radiostatio_theme", "dark");
-  const [playerStyle, setPlayerStyle] = usePersistedState<PlayerStyle>("radiostatio_style", "wheel");
+  const [storedStyle, setPlayerStyle] = usePersistedState<PlayerStyle>("radiostatio_style", "wheel");
+  // La radio se jubiló: a quien la tenía guardada le toca el reproductor de CD.
+  const playerStyle = (storedStyle as string) === "radio" ? "cd" : storedStyle;
 
   useEffect(() => {
     handleRedirectCallback().then((didLogin) => {

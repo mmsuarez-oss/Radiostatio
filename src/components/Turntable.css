@@ -136,6 +136,20 @@
   pointer-events: none;
 }
 
+/* El lacre: el anillo liso entre la etiqueta y los surcos, donde el que hace
+   el máster deja su firma rayada. Se lee con el disco quieto. */
+.turntable__etching {
+  position: absolute;
+  bottom: 7%;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1deg);
+  font-size: 5px;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.3);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
 /* Just the centre pin now */
 .turntable__spindle {
   position: absolute;

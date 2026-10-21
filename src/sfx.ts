@@ -11,7 +11,7 @@ export function setSfxVolume(value: number) {
   master = value;
 }
 
-export type SfxName = "cassette-eject" | "cassette-insert" | "cassette-close" | "vinyl-stop" | "radio-static";
+export type SfxName = "cassette-eject" | "cassette-insert" | "cassette-close" | "vinyl-stop";
 
 interface SfxOptions {
   volume?: number;
@@ -75,7 +75,21 @@ export function playTick() {
   osc.stop(now + 0.03);
 }
 
-/** Trozo al azar del clip largo de sintonía, para que no suene siempre igual. */
-export function playRadioStatic() {
-  playSfx("radio-static", { volume: 0.4, from: Math.random() * 4.5, durationMs: 1100 });
+/** El motor del CD acelerando al cambiar de pista. También sintetizado. */
+export function playDiscSpin() {
+  if (master === 0) return;
+  audioCtx ??= new AudioContext();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(170, now);
+  osc.frequency.exponentialRampToValueAtTime(680, now + 0.26);
+  osc.frequency.exponentialRampToValueAtTime(420, now + 0.42);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(0.05 * master, now + 0.06);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now + 0.46);
 }

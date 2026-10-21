@@ -7,20 +7,25 @@ import "./LibraryShelf.css";
 interface LibraryShelfProps {
   style: PlayerStyle;
   onSelect: (uri: string) => void;
+  /** Si viene, se muestran estos (búsqueda) en vez de la biblioteca guardada. */
+  items?: LibraryItem[];
 }
 
-export function LibraryShelf({ style, onSelect }: LibraryShelfProps) {
-  const [items, setItems] = useState<LibraryItem[]>([]);
+export function LibraryShelf({ style, onSelect, items: given }: LibraryShelfProps) {
+  const [saved, setSaved] = useState<LibraryItem[]>([]);
   const [needsReconnect, setNeedsReconnect] = useState(false);
 
   useEffect(() => {
+    if (given) return;
     getLibraryItems()
-      .then(setItems)
+      .then(setSaved)
       .catch((e) => {
         console.error("getLibraryItems failed", e);
         setNeedsReconnect(true);
       });
-  }, []);
+  }, [given]);
+
+  const items = given ?? saved;
 
   if (needsReconnect) {
     return (

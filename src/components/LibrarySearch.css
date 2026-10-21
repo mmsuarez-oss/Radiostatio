@@ -1,0 +1,158 @@
+/* La pestaña de búsqueda es la disquería: mostrador de madera, separadores de
+   cartón entre las bateas y etiquetas de precio escritas a mano. */
+.record-shop {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 10px 12px;
+}
+
+/* Mostrador: listón de madera con veta */
+.record-shop__counter {
+  padding: 8px;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 11px),
+    linear-gradient(165deg, #9a6b3c 0%, #7a5129 55%, #5d3c1d 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 224, 182, 0.35),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 3px 8px rgba(0, 0, 0, 0.35);
+}
+
+/* Ficha de papel sobre el mostrador */
+.record-shop__input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 4px;
+  background: #f1e9d8;
+  color: #2a2a2a;
+  font-family: inherit;
+  font-size: 13px;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px rgba(0, 0, 0, 0.18);
+}
+
+.record-shop__input::placeholder {
+  color: #8a7d66;
+}
+
+.record-shop__input:focus {
+  outline: 2px solid var(--accent, #e3b765);
+  outline-offset: 2px;
+}
+
+.record-shop__welcome,
+.record-shop__note {
+  margin: 14px 0 4px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-faint, #707072);
+}
+
+.record-shop__welcome {
+  font-family: "Permanent Marker", cursive;
+  font-size: 14px;
+  color: var(--text-muted, #a7a7a7);
+  transform: rotate(-1.2deg);
+}
+
+/* Separador de cartón entre bateas, con la pestaña escrita a mano */
+.record-shop__divider {
+  position: relative;
+  width: fit-content;
+  margin: 16px 0 2px;
+  padding: 4px 16px 4px 12px;
+  border-radius: 2px 10px 0 0;
+  background: linear-gradient(180deg, #d8c9a7 0%, #c3b088 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 5px rgba(0, 0, 0, 0.35);
+  font-family: "Permanent Marker", cursive;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: #3a2d17;
+  transform: rotate(-0.8deg);
+}
+
+.record-shop__tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 6px;
+}
+
+/* Cada canción es un disco con su etiqueta de precio pegada */
+.record-shop__track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface, #161618);
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08));
+  color: var(--text, #ffffff);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.record-shop__track:hover {
+  transform: translateX(2px);
+  box-shadow: inset 0 0 0 1px var(--accent, #e3b765);
+}
+
+.record-shop__track:active {
+  transform: scale(0.99);
+}
+
+.record-shop__track-art {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: block;
+  border-radius: 3px;
+  object-fit: cover;
+  background: var(--surface-2, #232325);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.record-shop__track-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.record-shop__track-name,
+.record-shop__track-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-shop__track-name {
+  font-size: 12px;
+}
+
+.record-shop__track-artist {
+  font-size: 11px;
+  color: var(--text-muted, #a7a7a7);
+}
+
+/* Etiqueta de precio: acá el precio es cuánto dura */
+.record-shop__price {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: #e9dcbd;
+  color: #3a2d17;
+  font-family: "Permanent Marker", cursive;
+  font-size: 11px;
+  transform: rotate(-2deg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
