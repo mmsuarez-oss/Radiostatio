@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Cassette.css";
 
 interface CassetteProps {
@@ -10,20 +10,48 @@ interface CassetteProps {
   onTogglePlay: () => void;
 }
 
-export function Cassette({ isPaused, albumName, insertTrigger, onNext, onPrevious, onTogglePlay }: CassetteProps) {
-  const [inserting, setInserting] = useState(false);
+const EJECT_MS = 350;
+const INSERT_MS = 750;
 
+export function Cassette({ isPaused, albumName, insertTrigger, onNext, onPrevious, onTogglePlay }: CassetteProps) {
+  const [displayed, setDisplayed] = useState(albumName);
+  const [phase, setPhase] = useState<"idle" | "ejecting" | "inserting">("idle");
+  const lastInsertTrigger = useRef(insertTrigger);
+
+  // A shelf selection arrives with a fresh albumName AND a bumped insertTrigger in the
+  // same update, so both must be handled together: eject with the *old* label still
+  // showing, only swap to the new one once the old tape has slid out.
   useEffect(() => {
-    if (insertTrigger === 0) return;
-    setInserting(true);
-    const t = setTimeout(() => setInserting(false), 750);
-    return () => clearTimeout(t);
-  }, [insertTrigger]);
+    const isShelfSelection = insertTrigger !== lastInsertTrigger.current;
+    lastInsertTrigger.current = insertTrigger;
+
+    if (!isShelfSelection) {
+      setDisplayed(albumName);
+      return;
+    }
+
+    setPhase("ejecting");
+    const t1 = setTimeout(() => {
+      setDisplayed(albumName);
+      setPhase("inserting");
+    }, EJECT_MS);
+    const t2 = setTimeout(() => setPhase("idle"), EJECT_MS + INSERT_MS);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [albumName, insertTrigger]);
+
+  const shellClass =
+    phase === "ejecting" ? "cassette__shell--ejecting" : phase === "inserting" ? "cassette__shell--inserting" : "";
 
   return (
     <div className="cassette">
-      <div className={`cassette__shell ${inserting ? "cassette__shell--inserting" : ""}`}>
-        <p className="cassette__label">{albumName || "Mixtape"}</p>
+      <div className={`cassette__shell ${shellClass}`}>
+        <div className="cassette__label-wrap">
+          <span className="cassette__label-banner" aria-hidden="true" />
+          <p className="cassette__label">{displayed || "Mixtape"}</p>
+        </div>
         <div className="cassette__reels">
           <div className={`cassette__reel ${!isPaused ? "cassette__reel--spinning" : ""}`} />
           <div className={`cassette__reel ${!isPaused ? "cassette__reel--spinning" : ""}`} />

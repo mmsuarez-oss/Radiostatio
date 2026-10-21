@@ -1,25 +1,46 @@
 .library-shelf {
   width: 100%;
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* The shelf is a flex child of .player, which shrinks it — that collapsed the auto rows
+     to ~4px while the aspect-ratio items kept their height, so covers overlapped. */
+  grid-auto-rows: min-content;
+  gap: 26px 20px;
+  justify-items: center;
+  max-height: 270px;
+  overflow-y: auto;
+  padding: 10px 6px;
+  scrollbar-width: thin;
 }
 
-.library-shelf::-webkit-scrollbar {
-  display: none;
+/* Tapes are wide rectangles — three per row leaves them letterbox-thin. */
+.library-shelf--cassette {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 26px 22px;
 }
 
+.library-shelf--cassette .library-shelf__item {
+  width: 92%;
+}
+
+/* Narrower than its grid cell on purpose: the gap alone never looks like enough
+   separation once the art fills edge to edge. */
 .library-shelf__item {
-  flex-shrink: 0;
+  width: 84%;
   border: none;
   padding: 0;
   overflow: hidden;
   background: var(--surface-2, #232325);
-  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)),
+    0 4px 10px rgba(0, 0, 0, 0.32);
   cursor: pointer;
   position: relative;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.library-shelf__item:active {
+  transform: scale(0.95);
 }
 
 .library-shelf__item img {
@@ -29,10 +50,9 @@
   display: block;
 }
 
-/* Default + turntable: a little vinyl disc */
+/* Disc: a little vinyl record, used for turntable/radio */
 .library-shelf__item--disc {
-  width: 48px;
-  height: 48px;
+  aspect-ratio: 1;
   border-radius: 50%;
 }
 
@@ -40,19 +60,54 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 7px;
-  height: 7px;
-  margin: -3.5px 0 0 -3.5px;
+  width: 10%;
+  height: 10%;
+  margin: -5% 0 0 -5%;
   border-radius: 50%;
   background: var(--surface-2, #232325);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
 }
 
-/* Cassette: a little tape shape with a label strip */
+/* Wheel/iPod: a square app icon, not a disc — this is a menu, not a deck */
+.library-shelf__item--square {
+  aspect-ratio: 1;
+  border-radius: 22%;
+}
+
+.library-shelf__item--square::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 42%);
+}
+
+.library-shelf__item--square:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow:
+    inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)),
+    0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.library-shelf__item--square:active {
+  transform: scale(0.93);
+}
+
+/* Cassette: a literal tape shape, reels over the art, label strip below, tilting in
+   perspective on hover/press so it reads as an object sitting on the shelf. */
 .library-shelf__item--tape {
-  width: 58px;
-  height: 44px;
+  aspect-ratio: 1.55;
   border-radius: 4px;
+}
+
+.library-shelf__item--tape:hover {
+  transform: perspective(420px) rotateX(8deg) translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)),
+    0 10px 18px rgba(0, 0, 0, 0.4);
+}
+
+.library-shelf__item--tape:active {
+  transform: perspective(420px) rotateX(-6deg) scale(0.96);
 }
 
 .library-shelf__item--tape::after {
@@ -61,8 +116,27 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 30%;
-  background: rgba(0, 0, 0, 0.55);
+  height: 28%;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.library-shelf__reel {
+  position: absolute;
+  top: 36%;
+  width: 22%;
+  aspect-ratio: 1;
+  margin-top: -11%;
+  border-radius: 50%;
+  background: rgba(10, 10, 10, 0.75);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.library-shelf__reel:first-of-type {
+  left: 14%;
+}
+
+.library-shelf__reel:last-of-type {
+  right: 14%;
 }
 
 .library-shelf__reconnect {

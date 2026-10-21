@@ -98,16 +98,31 @@ export async function handleRedirectCallback(): Promise<boolean> {
   return true;
 }
 
+// Spotify's PKCE refresh tokens rotate on every use: two concurrent refreshes (e.g. a user
+// double-tapping album covers right as the token expires) would race for the same
+// refresh_token, and the loser gets an invalid_grant error. Sharing one in-flight refresh
+// across concurrent callers avoids that.
+let refreshPromise: Promise<TokenData> | null = null;
+
 export async function getValidAccessToken(): Promise<string | null> {
   const token = getStoredToken();
   if (!token) return null;
   if (Date.now() < token.expires_at - 10_000) return token.access_token;
 
-  const refreshed = await requestToken({
-    grant_type: "refresh_token",
-    refresh_token: token.refresh_token,
-    client_id: CLIENT_ID,
-  });
-  storeToken(refreshed);
+  if (!refreshPromise) {
+    refreshPromise = requestToken({
+      grant_type: "refresh_token",
+      refresh_token: token.refresh_token,
+      client_id: CLIENT_ID,
+    })
+      .then((refreshed) => {
+        storeToken(refreshed);
+        return refreshed;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  const refreshed = await refreshPromise;
   return refreshed.access_token;
 }

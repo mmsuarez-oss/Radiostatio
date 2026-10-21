@@ -39,10 +39,25 @@ export function Player({ style, onStyleChange }: PlayerProps) {
   const controlsRef = useRef<Awaited<ReturnType<typeof createPlayer>> | null>(null);
   const trackRef = useRef<NowPlaying | null>(null);
   const anchorRef = useRef({ position: 0, timestamp: Date.now() });
+  const pendingAnimRef = useRef<PlayerStyle | null>(null);
+  const selectingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    createPlayer((state) => !cancelled && setTrack(state)).then((controls) => {
+    createPlayer((state) => {
+      if (cancelled) return;
+      // Fire the selection animation only once the real track data has actually
+      // arrived, instead of on the click itself — otherwise on a slow connection
+      // the animation finishes before the art updates and looks broken. Bumping
+      // the trigger here, in the same callback as setTrack, keeps both updates
+      // in one React batch so the new art and the animation land together.
+      setTrack(state);
+      if (pendingAnimRef.current) {
+        if (pendingAnimRef.current === "turntable") setSpinTrigger((s) => s + 1);
+        if (pendingAnimRef.current === "cassette") setInsertTrigger((s) => s + 1);
+        pendingAnimRef.current = null;
+      }
+    }).then((controls) => {
       if (!cancelled) controlsRef.current = controls;
     });
     return () => {
@@ -83,10 +98,18 @@ export function Player({ style, onStyleChange }: PlayerProps) {
     controlsRef.current?.togglePlay();
   }
 
-  function playAlbum(uri: string) {
-    controlsRef.current?.playAlbum(uri);
-    if (style === "turntable") setSpinTrigger((s) => s + 1);
-    if (style === "cassette") setInsertTrigger((s) => s + 1);
+  // On mobile, tapping two covers in quick succession (or a fat-finger hitting the
+  // neighboring one) fired two overlapping /play requests — the device bounced between
+  // both contexts, flashing through several tracks before settling. One in flight at a time.
+  async function playAlbum(uri: string) {
+    if (selectingRef.current) return;
+    selectingRef.current = true;
+    try {
+      await controlsRef.current?.playAlbum(uri);
+      if (style === "turntable" || style === "cassette") pendingAnimRef.current = style;
+    } finally {
+      selectingRef.current = false;
+    }
   }
 
   function applyVolume(next: number) {

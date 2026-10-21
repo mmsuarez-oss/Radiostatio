@@ -32,10 +32,15 @@ export function LibraryShelf({ style, onSelect }: LibraryShelfProps) {
 
   if (items.length === 0) return null;
 
-  const itemClass = style === "cassette" ? "library-shelf__item--tape" : "library-shelf__item--disc";
+  const itemClass =
+    style === "cassette"
+      ? "library-shelf__item--tape"
+      : style === "wheel"
+        ? "library-shelf__item--square"
+        : "library-shelf__item--disc";
 
   return (
-    <div className="library-shelf">
+    <div className={`library-shelf library-shelf--${style}`}>
       {items.map((item) => (
         <button
           key={item.uri}
@@ -45,6 +50,12 @@ export function LibraryShelf({ style, onSelect }: LibraryShelfProps) {
         >
           {item.image && <img src={item.image} alt={item.name} />}
           {style === "turntable" && <span className="library-shelf__hole" aria-hidden="true" />}
+          {style === "cassette" && (
+            <>
+              <span className="library-shelf__reel" aria-hidden="true" />
+              <span className="library-shelf__reel" aria-hidden="true" />
+            </>
+          )}
         </button>
       ))}
     </div>
