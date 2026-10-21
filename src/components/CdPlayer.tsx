@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { playDiscSpin, playSfx } from "../sfx";
-import { useRotaryDrag } from "./useRotaryDrag";
 import "./CdPlayer.css";
 
 interface CdPlayerProps {
@@ -35,7 +34,6 @@ export function CdPlayer({
   onPrevious,
   onTogglePlay,
 }: CdPlayerProps) {
-  const { ref, dragging, pulse, rotation, handlers } = useRotaryDrag({ onNext, onPrevious, triggerDegrees: 45 });
   const [disc, setDisc] = useState(albumArt);
   const [phase, setPhase] = useState<Phase>("idle");
   const previousAlbum = useRef(albumUri);
@@ -82,7 +80,7 @@ export function CdPlayer({
   }, [trackUri, albumUri]);
 
   const lidOpen = phase === "opening" || phase === "ejecting" || phase === "inserting";
-  const spinning = !dragging && !isPaused && phase === "idle";
+  const spinning = !isPaused && phase === "idle";
 
   return (
     <div className="cd-player">
@@ -93,13 +91,7 @@ export function CdPlayer({
         </div>
 
         <div className="cd-player__well">
-          <div
-            ref={ref}
-            className={`cd-player__disc cd-player__disc--${phase} ${dragging ? "cd-player__disc--dragging" : ""} ${spinning ? "cd-player__disc--spinning" : ""}`}
-            style={spinning || phase !== "idle" ? undefined : { transform: `rotate(${rotation}deg)` }}
-            {...handlers}
-          >
-            {pulse > 0 && <span key={pulse} className="cd-player__pulse" />}
+          <div className={`cd-player__disc cd-player__disc--${phase} ${spinning ? "cd-player__disc--spinning" : ""}`}>
             {disc && <img src={disc} alt="" draggable={false} />}
             <span className="cd-player__sheen" aria-hidden="true" />
             <span className="cd-player__hub" aria-hidden="true" />

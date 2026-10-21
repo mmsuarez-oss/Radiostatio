@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { formatRemaining } from "../format";
 import { playSfx } from "../sfx";
-import { useRotaryDrag } from "./useRotaryDrag";
 import "./Turntable.css";
 
 interface TurntableProps {
@@ -23,7 +22,6 @@ export function Turntable({
   spinTrigger,
   remainingMs,
 }: TurntableProps) {
-  const { ref, dragging, pulse, rotation, handlers } = useRotaryDrag({ onNext, onPrevious, triggerDegrees: 45 });
   const [selecting, setSelecting] = useState(false);
 
   useEffect(() => {
@@ -49,12 +47,8 @@ export function Turntable({
 
       <div className="turntable__platter">
         <div
-          ref={ref}
-          className={`turntable__record ${dragging ? "turntable__record--dragging" : ""} ${selecting ? "turntable__record--selecting" : ""} ${!selecting && !dragging && !isPaused ? "turntable__record--spinning" : ""}`}
-          style={selecting || (!dragging && !isPaused) ? undefined : { transform: `rotate(${rotation}deg)` }}
-          {...handlers}
+          className={`turntable__record ${selecting ? "turntable__record--selecting" : ""} ${!selecting && !isPaused ? "turntable__record--spinning" : ""}`}
         >
-          {pulse > 0 && <span key={pulse} className="turntable__pulse" />}
           {albumArt && <img src={albumArt} alt="" draggable={false} />}
           <div className="turntable__grooves" aria-hidden="true" />
           {/* Grabado a mano en el lacre, como en los vinilos de verdad */}
@@ -74,6 +68,11 @@ export function Turntable({
 
       <div className="turntable__controls">
         <span className="turntable__time">{formatRemaining(remainingMs)}</span>
+        <button className="turntable__skip" onClick={onPrevious} aria-label="Canción anterior">
+          <svg viewBox="0 0 24 24" width="12" height="12">
+            <path d="M6 5h2v14H6zm3 7 11-7v14z" fill="currentColor" />
+          </svg>
+        </button>
         <button className="turntable__play" onClick={onTogglePlay} aria-label="Reproducir / Pausar">
           {isPaused ? (
             <svg viewBox="0 0 24 24" width="14" height="14">
@@ -85,6 +84,11 @@ export function Turntable({
               <rect x="14" y="5" width="4" height="14" fill="currentColor" />
             </svg>
           )}
+        </button>
+        <button className="turntable__skip" onClick={onNext} aria-label="Canción siguiente">
+          <svg viewBox="0 0 24 24" width="12" height="12">
+            <path d="M16 5h2v14h-2zM4 5l11 7-11 7z" fill="currentColor" />
+          </svg>
         </button>
       </div>
 

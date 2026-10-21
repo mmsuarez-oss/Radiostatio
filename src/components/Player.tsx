@@ -15,8 +15,8 @@ const VOLUME_STEP = 0.1;
 
 const HINTS: Record<PlayerStyle, string> = {
   wheel: "Gira para cambiar de canción",
-  turntable: "Gira el disco para cambiar de canción",
-  cd: "Gira el disco para cambiar de pista",
+  turntable: "Usa los botones para cambiar de canción",
+  cd: "Usa los botones para cambiar de pista",
   cassette: "Usa los botones para avanzar",
 };
 
@@ -174,8 +174,8 @@ export function Player({ style, onStyleChange }: PlayerProps) {
         </div>
       )}
 
-      {/* La rueda ya lleva su propia barra en la pantalla del iPod */}
-      {style !== "wheel" && (
+      {/* La rueda y la tornamesa ya muestran el tiempo en el aparato */}
+      {style !== "wheel" && style !== "turntable" && (
         <div className="player__progress">
           <div className="player__progress-track">
             <div className="player__progress-fill" style={{ width: `${progressPct}%` }} />

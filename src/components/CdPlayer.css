@@ -96,9 +96,6 @@
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.25),
     0 6px 14px rgba(0, 0, 0, 0.55);
-  cursor: pointer;
-  touch-action: none;
-  user-select: none;
 }
 
 .cd-player__disc img {
@@ -156,25 +153,6 @@
 @keyframes cd-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-.cd-player__pulse {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: cd-pulse 0.5s ease-out;
-}
-
-@keyframes cd-pulse {
-  from {
-    box-shadow: inset 0 0 0 3px var(--accent, #e3b765);
-    opacity: 0.6;
-  }
-  to {
-    box-shadow: inset 0 0 0 0 var(--accent, #e3b765);
-    opacity: 0;
   }
 }
 
@@ -315,8 +293,7 @@
 @media (prefers-reduced-motion: reduce) {
   .cd-player__disc--spinning,
   .cd-player__disc--ejecting,
-  .cd-player__disc--inserting,
-  .cd-player__pulse {
+  .cd-player__disc--inserting {
     animation: none;
   }
 
