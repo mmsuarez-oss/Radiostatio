@@ -212,6 +212,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           isPaused={isPaused}
           onTogglePlay={togglePlay}
           albumArt={track?.albumArt ?? ""}
+          albumUri={track?.albumUri ?? ""}
           trackName={track?.name ?? ""}
           artist={track?.artists ?? ""}
           trackUri={track?.trackUri ?? ""}

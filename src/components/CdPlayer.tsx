@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
-import { playDiscSpin } from "../sfx";
+import { useEffect, useRef, useState } from "react";
+import { playDiscSpin, playSfx } from "../sfx";
 import { useRotaryDrag } from "./useRotaryDrag";
 import "./CdPlayer.css";
 
 interface CdPlayerProps {
   albumArt: string;
+  albumUri: string;
   trackName: string;
   artist: string;
   trackUri: string;
@@ -14,8 +15,18 @@ interface CdPlayerProps {
   onTogglePlay: () => void;
 }
 
+type Phase = "idle" | "opening" | "ejecting" | "inserting" | "closing";
+
+// Cambiar de disco: se levanta la tapa, sale el viejo, entra el nuevo, se cierra.
+// Los ms son los mismos que las animaciones de CdPlayer.css.
+const OPEN_MS = 300;
+const EJECT_MS = 380;
+const INSERT_MS = 560;
+const CLOSE_MS = 320;
+
 export function CdPlayer({
   albumArt,
+  albumUri,
   trackName,
   artist,
   trackUri,
@@ -25,16 +36,53 @@ export function CdPlayer({
   onTogglePlay,
 }: CdPlayerProps) {
   const { ref, dragging, pulse, rotation, handlers } = useRotaryDrag({ onNext, onPrevious, triggerDegrees: 45 });
+  const [disc, setDisc] = useState(albumArt);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const previousAlbum = useRef(albumUri);
+  const previousTrack = useRef(trackUri);
 
-  // El motor acelerando cada vez que cambia la pista, no en la primera.
-  const previousUri = useRef(trackUri);
   useEffect(() => {
-    const previous = previousUri.current;
-    previousUri.current = trackUri;
-    if (previous && previous !== trackUri) playDiscSpin();
-  }, [trackUri]);
+    const previous = previousAlbum.current;
+    previousAlbum.current = albumUri;
 
-  const spinning = !dragging && !isPaused;
+    // Primer disco de la sesión, o el mismo con la portada recién llegada.
+    if (!previous || previous === albumUri) {
+      setDisc(albumArt);
+      return;
+    }
+
+    setPhase("opening");
+    // El mismo chasquido de plástico que la tapa del casete.
+    playSfx("cassette-close", { volume: 0.5 });
+
+    const timers = [
+      setTimeout(() => setPhase("ejecting"), OPEN_MS),
+      setTimeout(() => {
+        setDisc(albumArt);
+        setPhase("inserting");
+      }, OPEN_MS + EJECT_MS),
+      setTimeout(() => {
+        setPhase("closing");
+        playSfx("cassette-close", { volume: 0.7 });
+      }, OPEN_MS + EJECT_MS + INSERT_MS),
+      setTimeout(() => {
+        setPhase("idle");
+        playDiscSpin();
+      }, OPEN_MS + EJECT_MS + INSERT_MS + CLOSE_MS),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [albumUri, albumArt]);
+
+  // Motor acelerando al saltar de pista. En un disco nuevo no: ahí ya suena al
+  // final de la secuencia de la tapa.
+  useEffect(() => {
+    const previous = previousTrack.current;
+    previousTrack.current = trackUri;
+    if (previous && previous !== trackUri && previousAlbum.current === albumUri) playDiscSpin();
+  }, [trackUri, albumUri]);
+
+  const lidOpen = phase === "opening" || phase === "ejecting" || phase === "inserting";
+  const spinning = !dragging && !isPaused && phase === "idle";
 
   return (
     <div className="cd-player">
@@ -44,16 +92,22 @@ export function CdPlayer({
           <span className="cd-player__lcd-artist">{artist || "—"}</span>
         </div>
 
-        <div
-          ref={ref}
-          className={`cd-player__disc ${dragging ? "cd-player__disc--dragging" : ""} ${spinning ? "cd-player__disc--spinning" : ""}`}
-          style={spinning ? undefined : { transform: `rotate(${rotation}deg)` }}
-          {...handlers}
-        >
-          {pulse > 0 && <span key={pulse} className="cd-player__pulse" />}
-          {albumArt && <img src={albumArt} alt="" draggable={false} />}
-          <span className="cd-player__sheen" aria-hidden="true" />
-          <span className="cd-player__hub" aria-hidden="true" />
+        <div className="cd-player__well">
+          <div
+            ref={ref}
+            className={`cd-player__disc cd-player__disc--${phase} ${dragging ? "cd-player__disc--dragging" : ""} ${spinning ? "cd-player__disc--spinning" : ""}`}
+            style={spinning || phase !== "idle" ? undefined : { transform: `rotate(${rotation}deg)` }}
+            {...handlers}
+          >
+            {pulse > 0 && <span key={pulse} className="cd-player__pulse" />}
+            {disc && <img src={disc} alt="" draggable={false} />}
+            <span className="cd-player__sheen" aria-hidden="true" />
+            <span className="cd-player__hub" aria-hidden="true" />
+          </div>
+
+          <div className={`cd-player__lid ${lidOpen ? "cd-player__lid--open" : ""}`} aria-hidden="true">
+            <span className="cd-player__latch" />
+          </div>
         </div>
 
         <div className="cd-player__controls">
