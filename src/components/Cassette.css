@@ -1,0 +1,80 @@
+.cassette {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.cassette__shell {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background: var(--surface-2, #232325);
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.cassette__reel {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(var(--text-faint, #707072) 0deg 4deg, transparent 4deg 45deg);
+  box-shadow: inset 0 0 0 10px var(--surface-2, #232325), inset 0 0 0 11px var(--border, rgba(255, 255, 255, 0.1));
+}
+
+.cassette__reel--spinning {
+  animation: cassette-spin 3s linear infinite;
+}
+
+@keyframes cassette-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cassette__buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cassette__button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-2, #232325);
+  color: var(--text, #ffffff);
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cassette__button--accent {
+  width: 52px;
+  height: 52px;
+  background: var(--accent, #e3b765);
+  color: #1a1308;
+  box-shadow: none;
+}
+
+@media (max-height: 700px) {
+  .cassette {
+    gap: 12px;
+  }
+
+  .cassette__shell {
+    height: 90px;
+  }
+
+  .cassette__reel {
+    width: 44px;
+    height: 44px;
+  }
+}

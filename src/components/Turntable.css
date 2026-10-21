@@ -1,0 +1,149 @@
+.turntable {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  flex-shrink: 0;
+  perspective: 500px;
+}
+
+@media (max-height: 700px) {
+  .turntable {
+    width: 170px;
+    height: 170px;
+  }
+}
+
+.turntable__record {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2, #232325);
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)), 0 6px 16px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.turntable__record--selecting {
+  animation: turntable-select 0.7s ease-out;
+}
+
+.turntable__record--spinning {
+  animation: turntable-spin 2.8s linear infinite;
+}
+
+@keyframes turntable-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes turntable-select {
+  0% {
+    transform: scale(0.7) rotate3d(0.25, 1, 0, 0deg);
+    opacity: 0.3;
+  }
+  55% {
+    transform: scale(1.08) rotate3d(0.25, 1, 0, 420deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate3d(0.25, 1, 0, 720deg);
+    opacity: 1;
+  }
+}
+
+.turntable__record img {
+  position: absolute;
+  inset: 14%;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.turntable__grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0,
+    transparent 7px,
+    rgba(0, 0, 0, 0.12) 7.5px
+  );
+  pointer-events: none;
+}
+
+.turntable__spindle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent, #e3b765);
+  color: #1a1308;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.turntable__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: turntable-pulse 0.5s ease-out;
+}
+
+@keyframes turntable-pulse {
+  from {
+    box-shadow: inset 0 0 0 3px var(--accent, #e3b765);
+    opacity: 0.6;
+  }
+  to {
+    box-shadow: inset 0 0 0 0 var(--accent, #e3b765);
+    opacity: 0;
+  }
+}
+
+.turntable__arm {
+  position: absolute;
+  top: -6px;
+  right: -14px;
+  width: 90px;
+  height: 90px;
+  pointer-events: none;
+}
+
+.turntable__arm::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface-2, #2a2a2c);
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.1));
+}
+
+.turntable__arm-head {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 3px;
+  height: 64px;
+  border-radius: 2px;
+  background: var(--text-faint, #707072);
+  transform: rotate(32deg);
+  transform-origin: top center;
+}

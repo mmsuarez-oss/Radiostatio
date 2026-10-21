@@ -1,0 +1,25 @@
+.style-switcher {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-2, #232325);
+  width: 100%;
+}
+
+.style-switcher__option {
+  flex: 1;
+  padding: 6px 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-muted, #a7a7a7);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.style-switcher__option--active {
+  background: var(--surface, #161618);
+  color: var(--text, #ffffff);
+}
