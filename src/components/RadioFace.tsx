@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+import { playRadioStatic } from "../sfx";
 import { useRotaryDrag } from "./useRotaryDrag";
 import { RotaryKnob } from "./RotaryKnob";
 import "./RadioFace.css";
@@ -9,10 +11,27 @@ interface RadioFaceProps {
   onPrevious: () => void;
   onTogglePlay: () => void;
   onVolumeChange: (value: number) => void;
+  trackUri: string;
 }
 
-export function RadioFace({ isPaused, volume, onNext, onPrevious, onTogglePlay, onVolumeChange }: RadioFaceProps) {
+export function RadioFace({
+  isPaused,
+  volume,
+  onNext,
+  onPrevious,
+  onTogglePlay,
+  onVolumeChange,
+  trackUri,
+}: RadioFaceProps) {
   const { ref, dragging, pulse, rotation, handlers } = useRotaryDrag({ onNext, onPrevious, triggerDegrees: 45 });
+
+  // Chispazo de estática al sintonizar otra canción, no en la primera que carga.
+  const previousUri = useRef(trackUri);
+  useEffect(() => {
+    const previous = previousUri.current;
+    previousUri.current = trackUri;
+    if (previous && previous !== trackUri) playRadioStatic();
+  }, [trackUri]);
 
   return (
     <div className="radio-face">

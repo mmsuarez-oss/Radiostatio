@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { playSfx } from "../sfx";
 import { useRotaryDrag } from "./useRotaryDrag";
 import "./Turntable.css";
 
@@ -17,10 +18,18 @@ export function Turntable({ albumArt, isPaused, onNext, onPrevious, onTogglePlay
 
   useEffect(() => {
     if (spinTrigger === 0) return;
+    playSfx("vinyl-stop", { volume: 0.5 });
     setSelecting(true);
     const t = setTimeout(() => setSelecting(false), 700);
     return () => clearTimeout(t);
   }, [spinTrigger]);
+
+  // El frenazo del plato suena solo al pausar: ni al montar ni al reanudar.
+  const wasPaused = useRef(isPaused);
+  useEffect(() => {
+    if (isPaused && !wasPaused.current) playSfx("vinyl-stop", { volume: 0.45 });
+    wasPaused.current = isPaused;
+  }, [isPaused]);
 
   return (
     <div className="turntable">

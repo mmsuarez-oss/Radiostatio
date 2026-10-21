@@ -35,7 +35,6 @@ export function Player({ style, onStyleChange }: PlayerProps) {
   const [volume, setVolume] = useState(0.6);
   const [progressMs, setProgressMs] = useState(0);
   const [spinTrigger, setSpinTrigger] = useState(0);
-  const [insertTrigger, setInsertTrigger] = useState(0);
   const controlsRef = useRef<Awaited<ReturnType<typeof createPlayer>> | null>(null);
   const trackRef = useRef<NowPlaying | null>(null);
   const anchorRef = useRef({ position: 0, timestamp: Date.now() });
@@ -54,7 +53,6 @@ export function Player({ style, onStyleChange }: PlayerProps) {
       setTrack(state);
       if (pendingAnimRef.current) {
         if (pendingAnimRef.current === "turntable") setSpinTrigger((s) => s + 1);
-        if (pendingAnimRef.current === "cassette") setInsertTrigger((s) => s + 1);
         pendingAnimRef.current = null;
       }
     }).then((controls) => {
@@ -115,7 +113,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
   function playAlbum(uri: string) {
     return withSelectionLock(async () => {
       await controlsRef.current?.playAlbum(uri);
-      if (style === "turntable" || style === "cassette") pendingAnimRef.current = style;
+      if (style === "turntable") pendingAnimRef.current = style;
     });
   }
 
@@ -217,6 +215,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           onTogglePlay={togglePlay}
           volume={volume}
           onVolumeChange={applyVolume}
+          trackUri={track?.trackUri ?? ""}
         />
       )}
       {style === "cassette" && (
@@ -226,7 +225,8 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           isPaused={isPaused}
           onTogglePlay={togglePlay}
           albumName={track?.albumName ?? ""}
-          insertTrigger={insertTrigger}
+          albumArt={track?.albumArt ?? ""}
+          albumUri={track?.albumUri ?? ""}
         />
       )}
 
