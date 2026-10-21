@@ -1,3 +1,4 @@
+import { formatRemaining, formatTime } from "../format";
 import { playTick } from "../sfx";
 import { useRotaryDrag } from "./useRotaryDrag";
 import "./Wheel.css";
@@ -9,9 +10,21 @@ interface WheelProps {
   onTogglePlay: () => void;
   trackName: string;
   artist: string;
+  progressMs: number;
+  durationMs: number;
 }
 
-export function Wheel({ onNext, onPrevious, isPaused, onTogglePlay, trackName, artist }: WheelProps) {
+export function Wheel({
+  onNext,
+  onPrevious,
+  isPaused,
+  onTogglePlay,
+  trackName,
+  artist,
+  progressMs,
+  durationMs,
+}: WheelProps) {
+  const played = durationMs ? Math.min(100, (progressMs / durationMs) * 100) : 0;
   const { ref, dragging, pulse, handlers } = useRotaryDrag({
     onNext,
     onPrevious,
@@ -25,6 +38,13 @@ export function Wheel({ onNext, onPrevious, isPaused, onTogglePlay, trackName, a
         <p className="ipod__brand">Radiostatio</p>
         <p className="ipod__track">{trackName || "Conecta Spotify"}</p>
         <p className="ipod__artist">{artist || "y dale play"}</p>
+        <div className="ipod__progress">
+          <span className="ipod__elapsed">{formatTime(progressMs)}</span>
+          <span className="ipod__bar">
+            <span className="ipod__bar-fill" style={{ width: `${played}%` }} />
+          </span>
+          <span className="ipod__remaining">{formatRemaining(durationMs - progressMs)}</span>
+        </div>
       </div>
 
       <div ref={ref} className={`wheel ${dragging ? "wheel--dragging" : ""}`} {...handlers}>

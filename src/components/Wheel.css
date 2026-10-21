@@ -64,6 +64,37 @@
   text-overflow: ellipsis;
 }
 
+/* Barra de la pantalla: cuánto lleva y cuánto falta, como el iPod */
+.ipod__progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ipod__elapsed,
+.ipod__remaining {
+  font-size: 9px;
+  color: #8b8c92;
+  font-variant-numeric: tabular-nums;
+}
+
+.ipod__bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #27282d;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.7);
+}
+
+.ipod__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #b9dcff 0%, #4a9ae8 100%);
+}
+
 .wheel {
   width: 180px;
   height: 180px;

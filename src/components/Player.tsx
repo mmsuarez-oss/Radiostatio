@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPlayer, type NowPlaying } from "../spotify/player";
 import { setSfxVolume } from "../sfx";
+import { formatTime } from "../format";
 import { Wheel } from "./Wheel";
 import { Turntable } from "./Turntable";
 import { CdPlayer } from "./CdPlayer";
@@ -18,13 +19,6 @@ const HINTS: Record<PlayerStyle, string> = {
   cd: "Gira el disco para cambiar de pista",
   cassette: "Usa los botones para avanzar",
 };
-
-function formatTime(ms: number) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
 
 interface PlayerProps {
   style: PlayerStyle;
@@ -175,15 +169,18 @@ export function Player({ style, onStyleChange }: PlayerProps) {
         </div>
       )}
 
-      <div className="player__progress">
-        <div className="player__progress-track">
-          <div className="player__progress-fill" style={{ width: `${progressPct}%` }} />
+      {/* La rueda ya lleva su propia barra en la pantalla del iPod */}
+      {style !== "wheel" && (
+        <div className="player__progress">
+          <div className="player__progress-track">
+            <div className="player__progress-fill" style={{ width: `${progressPct}%` }} />
+          </div>
+          <div className="player__progress-labels">
+            <span>{formatTime(progressMs)}</span>
+            <span>{track ? formatTime(track.duration) : "0:00"}</span>
+          </div>
         </div>
-        <div className="player__progress-labels">
-          <span>{formatTime(progressMs)}</span>
-          <span>{track ? formatTime(track.duration) : "0:00"}</span>
-        </div>
-      </div>
+      )}
 
       {style === "wheel" && (
         <Wheel
@@ -193,6 +190,8 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           onTogglePlay={togglePlay}
           trackName={track?.name ?? ""}
           artist={track?.artists ?? ""}
+          progressMs={progressMs}
+          durationMs={track?.duration ?? 0}
         />
       )}
       {style === "turntable" && (
@@ -203,6 +202,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
           isPaused={isPaused}
           onTogglePlay={togglePlay}
           spinTrigger={spinTrigger}
+          remainingMs={(track?.duration ?? 0) - progressMs}
         />
       )}
       {style === "cd" && (

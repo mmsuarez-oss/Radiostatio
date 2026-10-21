@@ -170,8 +170,8 @@
 .turntable__arm {
   position: absolute;
   top: 30px;
-  right: 26px;
-  width: 70px;
+  left: 150px;
+  width: 76px;
   height: 130px;
   pointer-events: none;
 }
@@ -180,8 +180,8 @@
 .turntable__arm::before {
   content: "";
   position: absolute;
-  top: 14px;
-  right: 0;
+  top: 15px;
+  left: 46px;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -193,8 +193,8 @@
 
 .turntable__counterweight {
   position: absolute;
-  top: 0;
-  right: 4px;
+  top: -16px;
+  left: -5.5px;
   width: 14px;
   height: 14px;
   border-radius: 3px;
@@ -204,10 +204,10 @@
 
 .turntable__arm-tube {
   position: absolute;
-  top: 22px;
-  right: 10px;
+  top: 26px;
+  left: 56px;
   width: 3px;
-  height: 92px;
+  height: 84px;
   border-radius: 2px;
   background: linear-gradient(90deg, #4e535a 0%, #a8aeb7 45%, #51565e 100%);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
@@ -217,6 +217,7 @@
   transition: transform 0.9s cubic-bezier(0.45, 0, 0.25, 1);
 }
 
+/* 40° deja la cápsula justo sobre el surco de entrada del disco */
 .turntable__arm--playing .turntable__arm-tube {
   transform: rotate(40deg);
 }
@@ -224,7 +225,7 @@
 /* Cápsula: el codo del brazo en S y la pastilla */
 .turntable__headshell {
   position: absolute;
-  bottom: -8px;
+  bottom: -9px;
   left: -6px;
   width: 15px;
   height: 15px;
@@ -244,20 +245,22 @@
   gap: 7px;
 }
 
-.turntable__speed {
-  width: 26px;
-  height: 20px;
+/* Display del tiempo que falta, donde iban los botones de velocidad */
+.turntable__time {
+  height: 22px;
+  padding: 0 9px;
   border-radius: 3px;
-  background: linear-gradient(180deg, #34383d 0%, #1b1d21 100%);
+  background: linear-gradient(180deg, #16181c 0%, #0b0c0f 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    0 2px 3px rgba(0, 0, 0, 0.5);
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 9px;
-  letter-spacing: 0.04em;
+    inset 0 0 0 1px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+  color: var(--accent, #e3b765);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 .turntable__play {
@@ -305,6 +308,11 @@
     top: 20px;
     width: 136px;
     height: 136px;
+  }
+
+  .turntable__arm {
+    top: 24px;
+    left: 138px;
   }
 
   .turntable__record {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { formatRemaining } from "../format";
 import { playSfx } from "../sfx";
 import { useRotaryDrag } from "./useRotaryDrag";
 import "./Turntable.css";
@@ -10,9 +11,18 @@ interface TurntableProps {
   onPrevious: () => void;
   onTogglePlay: () => void;
   spinTrigger: number;
+  remainingMs: number;
 }
 
-export function Turntable({ albumArt, isPaused, onNext, onPrevious, onTogglePlay, spinTrigger }: TurntableProps) {
+export function Turntable({
+  albumArt,
+  isPaused,
+  onNext,
+  onPrevious,
+  onTogglePlay,
+  spinTrigger,
+  remainingMs,
+}: TurntableProps) {
   const { ref, dragging, pulse, rotation, handlers } = useRotaryDrag({ onNext, onPrevious, triggerDegrees: 45 });
   const [selecting, setSelecting] = useState(false);
 
@@ -56,19 +66,14 @@ export function Turntable({ albumArt, isPaused, onNext, onPrevious, onTogglePlay
       </div>
 
       <div className={`turntable__arm ${!isPaused ? "turntable__arm--playing" : ""}`} aria-hidden="true">
-        <span className="turntable__counterweight" />
         <div className="turntable__arm-tube">
+          <span className="turntable__counterweight" />
           <span className="turntable__headshell" />
         </div>
       </div>
 
       <div className="turntable__controls">
-        <span className="turntable__speed" aria-hidden="true">
-          33
-        </span>
-        <span className="turntable__speed" aria-hidden="true">
-          45
-        </span>
+        <span className="turntable__time">{formatRemaining(remainingMs)}</span>
         <button className="turntable__play" onClick={onTogglePlay} aria-label="Reproducir / Pausar">
           {isPaused ? (
             <svg viewBox="0 0 24 24" width="14" height="14">

@@ -3,6 +3,7 @@ import { getAlbumTracks, type AlbumTrack } from "../spotify/library";
 import { LibraryShelf } from "./LibraryShelf";
 import { LibrarySearch } from "./LibrarySearch";
 import type { PlayerStyle } from "./StyleSwitcher";
+import { formatTime } from "../format";
 import "./LibraryPanel.css";
 
 interface LibraryPanelProps {
@@ -12,11 +13,6 @@ interface LibraryPanelProps {
   currentTrackUri: string;
   onSelectAlbum: (uri: string) => void;
   onSelectTrack: (trackUri: string, albumUri?: string) => void;
-}
-
-function formatDuration(ms: number) {
-  const total = Math.floor(ms / 1000);
-  return `${Math.floor(total / 60)}:${(total % 60).toString().padStart(2, "0")}`;
 }
 
 export function LibraryPanel({
@@ -93,7 +89,7 @@ export function LibraryPanel({
                 <span className="library-panel__track-name">{track.name}</span>
                 <span className="library-panel__track-artist">{track.artists}</span>
               </span>
-              <span className="library-panel__track-time">{formatDuration(track.durationMs)}</span>
+              <span className="library-panel__track-time">{formatTime(track.durationMs)}</span>
             </button>
           ))}
         </div>

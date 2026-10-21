@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { searchCatalog, type LibraryItem, type SearchTrack } from "../spotify/library";
 import { LibraryShelf } from "./LibraryShelf";
 import type { PlayerStyle } from "./StyleSwitcher";
+import { formatTime } from "../format";
 import "./LibrarySearch.css";
 
 interface LibrarySearchProps {
@@ -11,11 +12,6 @@ interface LibrarySearchProps {
 }
 
 const MIN_QUERY = 2;
-
-function formatDuration(ms: number) {
-  const total = Math.floor(ms / 1000);
-  return `${Math.floor(total / 60)}:${(total % 60).toString().padStart(2, "0")}`;
-}
 
 export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySearchProps) {
   const [query, setQuery] = useState("");
@@ -101,7 +97,7 @@ export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySe
                   <span className="record-shop__track-name">{track.name}</span>
                   <span className="record-shop__track-artist">{track.artists}</span>
                 </span>
-                <span className="record-shop__price">{formatDuration(track.durationMs)}</span>
+                <span className="record-shop__price">{formatTime(track.durationMs)}</span>
               </button>
             ))}
           </div>
