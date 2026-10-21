@@ -127,6 +127,11 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      // Escribiendo en el buscador, el espacio es un espacio y las flechas
+      // mueven el cursor: los atajos globales no van sobre un campo de texto.
+      const target = e.target as HTMLElement | null;
+      if (target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName ?? "")) return;
+
       if (e.key === "ArrowRight") nextTrack();
       else if (e.key === "ArrowLeft") previousTrack();
       else if (e.key === "ArrowUp") {

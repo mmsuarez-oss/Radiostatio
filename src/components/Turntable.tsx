@@ -88,7 +88,7 @@ export function Turntable({
         </button>
       </div>
 
-      <span className="turntable__power" aria-hidden="true" />
+      <span className={`turntable__power ${isPaused ? "" : "turntable__power--on"}`} aria-hidden="true" />
     </div>
   );
 }
