@@ -142,6 +142,10 @@ button.wheel__label {
   cursor: pointer;
 }
 
+button.wheel__label svg {
+  display: block;
+}
+
 button.wheel__label:active {
   color: #55555c;
 }

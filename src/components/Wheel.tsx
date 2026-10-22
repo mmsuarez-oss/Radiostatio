@@ -60,7 +60,9 @@ export function Wheel({
           onPointerDown={(e) => e.stopPropagation()}
           aria-label="Canción anterior"
         >
-          ⏮
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+            <path d="M6 5h2v14H6zm3 7 11-7v14z" fill="currentColor" />
+          </svg>
         </button>
         <button
           className="wheel__label wheel__label--right"
@@ -71,7 +73,9 @@ export function Wheel({
           onPointerDown={(e) => e.stopPropagation()}
           aria-label="Siguiente canción"
         >
-          ⏭
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
+            <path d="M16 5h2v14h-2zM4 5l11 7-11 7z" fill="currentColor" />
+          </svg>
         </button>
         <button
           className="wheel__label wheel__label--bottom"
@@ -82,7 +86,11 @@ export function Wheel({
           onPointerDown={(e) => e.stopPropagation()}
           aria-label="Reproducir / Pausar"
         >
-          ▶❚❚
+          <svg viewBox="0 0 30 24" width="17" height="13" aria-hidden="true">
+            <path d="M3 5l10 7-10 7z" fill="currentColor" />
+            <rect x="18" y="5" width="3.4" height="14" fill="currentColor" />
+            <rect x="24" y="5" width="3.4" height="14" fill="currentColor" />
+          </svg>
         </button>
         <button
           className="wheel__play"

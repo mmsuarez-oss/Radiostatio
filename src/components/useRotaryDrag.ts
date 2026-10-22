@@ -21,6 +21,10 @@ export function useRotaryDrag({
   const [dragging, setDragging] = useState(false);
   const [pulse, setPulse] = useState(0);
   const [rotation, setRotation] = useState(0);
+  // El dedo que manda. En el teléfono es fácil que caiga un segundo dedo (o el
+  // borde de la mano) sobre la rueda: sin esto, sus eventos se mezclan con los
+  // del primero, los ángulos saltan y la canción cambia sola.
+  const activePointer = useRef<number | null>(null);
   const lastAngle = useRef(0);
   const totalDelta = useRef(0);
   const firedSinceStart = useRef(0);
@@ -28,7 +32,8 @@ export function useRotaryDrag({
 
   function handlePointerDown(e: React.PointerEvent) {
     const el = ref.current;
-    if (!el) return;
+    if (!el || activePointer.current !== null) return;
+    activePointer.current = e.pointerId;
     const rect = el.getBoundingClientRect();
     lastAngle.current = angleFromCenter(rect.left + rect.width / 2, rect.top + rect.height / 2, e.clientX, e.clientY);
     totalDelta.current = 0;
@@ -39,7 +44,7 @@ export function useRotaryDrag({
   }
 
   function handlePointerMove(e: React.PointerEvent) {
-    if (!dragging) return;
+    if (e.pointerId !== activePointer.current) return;
     const el = ref.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
@@ -75,10 +80,14 @@ export function useRotaryDrag({
     firedSinceStart.current = steps;
   }
 
-  function handlePointerUp(e: React.PointerEvent) {
+  // También con pointercancel: el navegador se queda con el gesto cuando lo
+  // confunde con uno del sistema, y si no soltamos acá el arrastre queda colgado.
+  function endDrag(e: React.PointerEvent) {
+    if (e.pointerId !== activePointer.current) return;
+    activePointer.current = null;
     setDragging(false);
     setRotation(0);
-    ref.current?.releasePointerCapture(e.pointerId);
+    if (ref.current?.hasPointerCapture(e.pointerId)) ref.current.releasePointerCapture(e.pointerId);
   }
 
   return {
@@ -89,7 +98,8 @@ export function useRotaryDrag({
     handlers: {
       onPointerDown: handlePointerDown,
       onPointerMove: handlePointerMove,
-      onPointerUp: handlePointerUp,
+      onPointerUp: endDrag,
+      onPointerCancel: endDrag,
     },
   };
 }
