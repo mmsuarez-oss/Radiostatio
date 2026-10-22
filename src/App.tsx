@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { getStoredToken, handleRedirectCallback } from "./spotify/auth";
 import { Login } from "./components/Login";
 import { Player } from "./components/Player";
-import { Settings } from "./components/Settings";
+import { ACCENTS, BODIES, Settings } from "./components/Settings";
 import type { PlayerStyle } from "./components/StyleSwitcher";
 import "./App.css";
 
@@ -17,6 +17,8 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [loginError, setLoginError] = useState<string>();
   const [theme, setTheme] = usePersistedState<string>("radiostatio_theme", "dark");
+  const [accent, setAccent] = usePersistedState("radiostatio_accent", ACCENTS[0].value);
+  const [body, setBody] = usePersistedState("radiostatio_body", BODIES[0].value);
   const [storedStyle, setPlayerStyle] = usePersistedState<PlayerStyle>("radiostatio_style", "wheel");
   // La radio se jubiló: a quien la tenía guardada le toca el reproductor de CD.
   const playerStyle = (storedStyle as string) === "radio" ? "cd" : storedStyle;
@@ -32,8 +34,15 @@ export default function App() {
   if (!ready) return null;
 
   return (
-    <div className="app" data-theme={theme}>
-      <Settings theme={theme} onThemeChange={setTheme} />
+    <div className="app" data-theme={theme} style={{ "--accent": accent, "--body": body } as CSSProperties}>
+      <Settings
+        theme={theme}
+        onThemeChange={setTheme}
+        accent={accent}
+        onAccentChange={setAccent}
+        body={body}
+        onBodyChange={setBody}
+      />
       {loggedIn ? <Player style={playerStyle} onStyleChange={setPlayerStyle} /> : <Login error={loginError} />}
     </div>
   );

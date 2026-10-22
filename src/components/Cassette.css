@@ -16,7 +16,12 @@
   width: 100%;
   height: calc(var(--bay-h) + 96px);
   border-radius: 10px;
-  background: linear-gradient(165deg, #3d7fd0 0%, #1f5aa8 38%, #143d75 100%);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--body, #1f5aa8) 72%, #ffffff) 0%,
+    var(--body, #1f5aa8) 38%,
+    color-mix(in srgb, var(--body, #1f5aa8) 62%, #000000) 100%
+  );
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.45),
     inset 0 0 0 1px rgba(0, 0, 0, 0.3),
@@ -249,7 +254,7 @@
   top: calc(12px + var(--bay-h) + 8px);
   height: 26px;
   border-radius: 3px;
-  background-color: #16406f;
+  background-color: color-mix(in srgb, var(--body, #1f5aa8) 70%, #000000);
   background-image: radial-gradient(rgba(0, 0, 0, 0.6) 1.1px, transparent 1.3px);
   background-size: 6px 6px;
   box-shadow:

@@ -1,5 +1,4 @@
 .player {
-  --accent: #e3b765;
   width: min(92vw, 340px);
   display: flex;
   flex-direction: column;

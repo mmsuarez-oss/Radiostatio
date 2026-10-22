@@ -1,8 +1,15 @@
-.theme-toggle {
+.settings {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.settings__button {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -16,6 +23,67 @@
   cursor: pointer;
 }
 
-.theme-toggle:hover {
+.settings__button:hover,
+.settings__button--active {
   color: var(--text, #ffffff);
+}
+
+.settings__panel {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--surface, #161618);
+  box-shadow:
+    inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08)),
+    0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
+.settings__label {
+  margin: 0 0 7px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #a7a7a7);
+}
+
+.settings__swatches {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 7px;
+}
+
+/* El último grupo no necesita separación, el panel ya tiene padding */
+.settings__swatches:not(:last-child) {
+  margin-bottom: 14px;
+}
+
+.settings__swatch {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 0 1px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.settings__swatch:hover {
+  transform: scale(1.08);
+}
+
+/* El elegido queda con un aro, que se ve sobre cualquier color */
+.settings__swatch--active {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 0 2px var(--surface, #161618),
+    0 0 0 4px var(--text, #ffffff);
+}
+
+@media (max-width: 420px) {
+  .settings {
+    top: 12px;
+    right: 12px;
+  }
 }
