@@ -1,24 +1,6 @@
 import { useState } from "react";
+import { ACCENTS, BODIES, type Swatch } from "../palettes";
 import "./Settings.css";
-
-// El primero de cada lista es el color de fábrica.
-export const ACCENTS = [
-  { value: "#e3b765", label: "Ámbar" },
-  { value: "#e0614f", label: "Rojo" },
-  { value: "#5ec98b", label: "Verde" },
-  { value: "#6ab6f0", label: "Celeste" },
-  { value: "#f08bc0", label: "Rosa" },
-  { value: "#dcd8cf", label: "Hueso" },
-];
-
-export const BODIES = [
-  { value: "#1f5aa8", label: "Azul" },
-  { value: "#9e2f2a", label: "Rojo" },
-  { value: "#2c7a56", label: "Verde" },
-  { value: "#3a3d44", label: "Grafito" },
-  { value: "#b08a4a", label: "Mostaza" },
-  { value: "#5b3f9e", label: "Violeta" },
-];
 
 interface SettingsProps {
   theme: string;
@@ -30,7 +12,7 @@ interface SettingsProps {
 }
 
 interface SwatchesProps {
-  options: { value: string; label: string }[];
+  options: Swatch[];
   current: string;
   onPick: (color: string) => void;
 }

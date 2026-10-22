@@ -2,7 +2,8 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { getStoredToken, handleRedirectCallback } from "./spotify/auth";
 import { Login } from "./components/Login";
 import { Player } from "./components/Player";
-import { ACCENTS, BODIES, Settings } from "./components/Settings";
+import { Settings } from "./components/Settings";
+import { ACCENTS, BODIES } from "./palettes";
 import type { PlayerStyle } from "./components/StyleSwitcher";
 import "./App.css";
 
