@@ -45,6 +45,23 @@
   margin-bottom: 24px;
 }
 
+.login-error {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(194, 54, 42, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(194, 54, 42, 0.45);
+  color: #ffb3a7;
+  font-size: 13px;
+  text-align: left;
+}
+
+.login-note {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
 .login-button {
   padding: 12px 24px;
   border: none;

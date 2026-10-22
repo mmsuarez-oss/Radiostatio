@@ -15,14 +15,16 @@ function usePersistedState<T extends string>(key: string, initial: T) {
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => !!getStoredToken());
   const [ready, setReady] = useState(false);
+  const [loginError, setLoginError] = useState<string>();
   const [theme, setTheme] = usePersistedState<string>("radiostatio_theme", "dark");
   const [storedStyle, setPlayerStyle] = usePersistedState<PlayerStyle>("radiostatio_style", "wheel");
   // La radio se jubiló: a quien la tenía guardada le toca el reproductor de CD.
   const playerStyle = (storedStyle as string) === "radio" ? "cd" : storedStyle;
 
   useEffect(() => {
-    handleRedirectCallback().then((didLogin) => {
+    handleRedirectCallback().then(({ loggedIn: didLogin, error }) => {
       if (didLogin) setLoggedIn(true);
+      setLoginError(error);
       setReady(true);
     });
   }, []);
@@ -32,7 +34,7 @@ export default function App() {
   return (
     <div className="app" data-theme={theme}>
       <Settings theme={theme} onThemeChange={setTheme} />
-      {loggedIn ? <Player style={playerStyle} onStyleChange={setPlayerStyle} /> : <Login />}
+      {loggedIn ? <Player style={playerStyle} onStyleChange={setPlayerStyle} /> : <Login error={loginError} />}
     </div>
   );
 }

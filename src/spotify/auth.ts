@@ -79,23 +79,54 @@ async function requestToken(body: Record<string, string>): Promise<TokenData> {
   };
 }
 
-export async function handleRedirectCallback(): Promise<boolean> {
-  const code = new URLSearchParams(window.location.search).get("code");
-  if (!code) return false;
+export interface RedirectResult {
+  loggedIn: boolean;
+  /** Código de Spotify (p.ej. access_denied) o uno nuestro, para explicarlo. */
+  error?: string;
+}
+
+function clearQuery() {
+  window.history.replaceState({}, "", window.location.pathname);
+}
+
+// Vuelve de Spotify con ?code= si salió bien y con ?error= si no. Antes el
+// error se ignoraba y volvías a la pantalla de login sin saber por qué; peor
+// todavía, si fallaba el canje del código la promesa quedaba rechazada y la
+// app se quedaba en blanco para siempre.
+export async function handleRedirectCallback(): Promise<RedirectResult> {
+  const params = new URLSearchParams(window.location.search);
+
+  const error = params.get("error");
+  if (error) {
+    clearQuery();
+    return { loggedIn: false, error };
+  }
+
+  const code = params.get("code");
+  if (!code) return { loggedIn: false };
 
   const verifier = sessionStorage.getItem(VERIFIER_KEY);
-  if (!verifier) return false;
+  if (!verifier) {
+    clearQuery();
+    return { loggedIn: false, error: "missing_verifier" };
+  }
 
-  const token = await requestToken({
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: REDIRECT_URI,
-    client_id: CLIENT_ID,
-    code_verifier: verifier,
-  });
-  storeToken(token);
-  window.history.replaceState({}, "", window.location.pathname);
-  return true;
+  try {
+    const token = await requestToken({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
+      code_verifier: verifier,
+    });
+    storeToken(token);
+    clearQuery();
+    return { loggedIn: true };
+  } catch (e) {
+    console.error("token exchange failed", e);
+    clearQuery();
+    return { loggedIn: false, error: "token_exchange_failed" };
+  }
 }
 
 // Spotify's PKCE refresh tokens rotate on every use: two concurrent refreshes (e.g. a user
