@@ -1,27 +1,69 @@
 # Radiostatio
 
-Reproductor de Spotify con forma de radio antigua: gira la perilla para pasar a la
-siguiente canción (o la anterior, girando al otro lado).
+Reproductor de Spotify con forma de aparato viejo. Elegís la carcasa y la manejás
+como al original: la rueda del iPod se gira para pasar de canción, la tornamesa y
+el reproductor de CD tienen sus botones, y el casete se cambia solo cuando cambiás
+de álbum — se abre la tapa, sale la cinta vieja y entra la nueva, con su ruido de
+plástico. También podés buscar discos y canciones desde la app.
 
-## Configurar Spotify
+## Por qué tenés que armar tu propia copia
 
-1. Entra a https://developer.spotify.com/dashboard y crea una app ("Create app").
-2. En **Redirect URIs** agrega exactamente: `http://127.0.0.1:5173/`
-   (Spotify ya no acepta `localhost`, solo la IP literal `127.0.0.1`)
-3. Marca la API "Web Playback SDK" como usada.
-4. Copia el **Client ID** y pégalo en `.env`:
-   ```
-   VITE_SPOTIFY_CLIENT_ID=tu_client_id
-   ```
-5. Necesitas Spotify **Premium** — el SDK de reproducción en navegador no funciona con cuentas gratis.
+Spotify no deja que una app de desarrollo la use cualquiera: solo entran las
+cuentas que el dueño agrega a mano, y desde marzo de 2026 el tope es de **5
+cuentas por app**. Abrirla a todo el mundo pide *extended quota*, que exige
+empresa registrada y 250.000 usuarios activos por mes, así que para un proyecto
+personal no existe.
 
-## Correr la app
+La vuelta es simple: cada quien corre su propia copia con su propio Client ID.
+Es gratis, tarda diez minutos y no depende de nadie más.
+
+## 1. Crear tu app de Spotify
+
+1. Entrá a <https://developer.spotify.com/dashboard> con tu cuenta y tocá
+   **Create app**. La cuenta tiene que tener **Premium**: el modo desarrollo lo
+   exige, y el reproductor en el navegador tampoco funciona con cuentas gratis.
+2. Nombre y descripción, lo que quieras.
+3. En **Redirect URIs** agregá una por cada lugar donde vayas a abrirla:
+   - `http://127.0.0.1:5173/` para desarrollo. Tiene que ser la IP literal:
+     Spotify ya no acepta `localhost`.
+   - `https://tu-app.vercel.app/` si la vas a publicar. Tiene que terminar en
+     barra y ser la URL exacta, y fuera de `127.0.0.1` solo acepta `https`.
+4. Marcá **Web Playback SDK** entre las APIs que vas a usar.
+5. Guardá y copiá el **Client ID** (está en *Settings*).
+
+## 2. Correrla en tu máquina
 
 ```bash
 npm install
+cp .env.example .env     # y pegá tu Client ID adentro
 npm run dev
 ```
 
-Abre http://localhost:5173, conecta tu cuenta y dale play desde la app de Spotify
-(celular o escritorio) o desde el botón de la radio — "Radiostatio" aparecerá como
-dispositivo disponible.
+El `.env` queda así:
+
+```
+VITE_SPOTIFY_CLIENT_ID=tu_client_id
+```
+
+Abrí <http://127.0.0.1:5173>, conectá tu cuenta y dale play. "Radiostatio" aparece
+como dispositivo disponible en cualquier app de Spotify, así que también podés
+mandarle la música desde el celular.
+
+## 3. Publicarla (opcional)
+
+Con [Vercel](https://vercel.com) alcanza con importar el repo: detecta Vite solo.
+Dos cosas que hay que hacer a mano:
+
+- Cargar `VITE_SPOTIFY_CLIENT_ID` en las variables de entorno del proyecto.
+- Volver al dashboard de Spotify y agregar la URL de producción a los Redirect
+  URIs, con la barra final.
+
+## Dejar entrar a alguien más
+
+Mientras la app esté en modo desarrollo, solo entran las cuentas de la lista
+(hasta 5, vos incluido). En el dashboard: tu app → **Settings** → **User
+Management** → nombre y **el correo con el que esa persona está registrada en
+Spotify**, no cualquier otro que use. Tarda hasta 15 minutos en tener efecto.
+
+Quien no esté en la lista no va a poder conectarse, por más que su cuenta exista.
+Los invitados no necesitan Premium para entrar, pero sí para que les suene.
