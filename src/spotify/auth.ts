@@ -1,5 +1,25 @@
-const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string;
-const REDIRECT_URI = window.location.origin + "/";
+// Una app de Spotify en modo desarrollo solo deja entrar a cinco cuentas, así
+// que el visitante puede traer el Client ID de la suya y usar esta misma página
+// con su propia cuota. El del build queda como valor por defecto.
+const CLIENT_ID_KEY = "radiostatio_client_id";
+
+export const REDIRECT_URI = window.location.origin + "/";
+
+export function getStoredClientId() {
+  return localStorage.getItem(CLIENT_ID_KEY) ?? "";
+}
+
+function clientId() {
+  return getStoredClientId() || ((import.meta.env.VITE_SPOTIFY_CLIENT_ID as string) ?? "");
+}
+
+export function setClientId(id: string) {
+  const clean = id.trim();
+  if (clean) localStorage.setItem(CLIENT_ID_KEY, clean);
+  else localStorage.removeItem(CLIENT_ID_KEY);
+  // El token guardado es de la app anterior; con otro Client ID no sirve.
+  logout();
+}
 const SCOPES = [
   "streaming",
   "user-read-email",
@@ -55,7 +75,7 @@ export async function redirectToLogin() {
   const challenge = await challengeFor(verifier);
 
   const url = new URL("https://accounts.spotify.com/authorize");
-  url.searchParams.set("client_id", CLIENT_ID);
+  url.searchParams.set("client_id", clientId());
   url.searchParams.set("response_type", "code");
   url.searchParams.set("redirect_uri", REDIRECT_URI);
   url.searchParams.set("scope", SCOPES);
@@ -116,7 +136,7 @@ export async function handleRedirectCallback(): Promise<RedirectResult> {
       grant_type: "authorization_code",
       code,
       redirect_uri: REDIRECT_URI,
-      client_id: CLIENT_ID,
+      client_id: clientId(),
       code_verifier: verifier,
     });
     storeToken(token);
@@ -144,7 +164,7 @@ export async function getValidAccessToken(): Promise<string | null> {
     refreshPromise = requestToken({
       grant_type: "refresh_token",
       refresh_token: token.refresh_token,
-      client_id: CLIENT_ID,
+      client_id: clientId(),
     })
       .then((refreshed) => {
         storeToken(refreshed);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPlayer, type NowPlaying } from "../spotify/player";
+import { createDemoPlayer } from "../spotify/demoPlayer";
 import { setSfxVolume } from "../sfx";
 import { formatTime } from "../format";
 import { Wheel } from "./Wheel";
@@ -23,9 +24,11 @@ const HINTS: Record<PlayerStyle, string> = {
 interface PlayerProps {
   style: PlayerStyle;
   onStyleChange: (style: PlayerStyle) => void;
+  /** Sin cuenta: aparato de juguete, para mirarlo funcionar. */
+  demo?: boolean;
 }
 
-export function Player({ style, onStyleChange }: PlayerProps) {
+export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
   const [track, setTrack] = useState<NowPlaying | null>(null);
   const [volume, setVolume] = useState(0.6);
   const [progressMs, setProgressMs] = useState(0);
@@ -38,7 +41,8 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
   useEffect(() => {
     let cancelled = false;
-    createPlayer((state) => {
+    const connect = demo ? createDemoPlayer : createPlayer;
+    connect((state) => {
       if (cancelled) return;
       // Fire the selection animation only once the real track data has actually
       // arrived, instead of on the click itself — otherwise on a slow connection
@@ -56,7 +60,7 @@ export function Player({ style, onStyleChange }: PlayerProps) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [demo]);
 
   useEffect(() => {
     trackRef.current = track;
@@ -253,14 +257,17 @@ export function Player({ style, onStyleChange }: PlayerProps) {
 
       <VolumeSlider value={volume} onChange={applyVolume} />
 
-      <LibraryPanel
-        style={style}
-        albumUri={track?.albumUri ?? ""}
-        albumName={track?.albumName ?? ""}
-        currentTrackUri={track?.trackUri ?? ""}
-        onSelectAlbum={playAlbum}
-        onSelectTrack={playTrack}
-      />
+      {/* La biblioteca pide cuenta: en el demo no va */}
+      {!demo && (
+        <LibraryPanel
+          style={style}
+          albumUri={track?.albumUri ?? ""}
+          albumName={track?.albumName ?? ""}
+          currentTrackUri={track?.trackUri ?? ""}
+          onSelectAlbum={playAlbum}
+          onSelectTrack={playTrack}
+        />
+      )}
     </div>
   );
 }

@@ -14,8 +14,22 @@ cuentas por app**. Abrirla a todo el mundo pide *extended quota*, que exige
 empresa registrada y 250.000 usuarios activos por mes, así que para un proyecto
 personal no existe.
 
-La vuelta es simple: cada quien corre su propia copia con su propio Client ID.
-Es gratis, tarda diez minutos y no depende de nadie más.
+La vuelta es simple: cada quien usa su propio Client ID. Hay dos caminos y el
+primero no necesita instalar nada.
+
+### El camino corto: tu Client ID en la página de otro
+
+En la pantalla de login, abrí **"No me deja entrar / quiero usar mi propia
+app"**. Ahí están los tres pasos y el Redirect URI listo para copiar: creás tu
+app en el dashboard de Spotify, pegás el Client ID y entrás con tu cuenta. Queda
+guardado en tu navegador y corrés con tu propia cuota, sin clonar nada.
+
+También hay un **"Probarlo sin cuenta"**, que enciende el aparato con un disco de
+mentira: sirve para ver cómo funciona, no para escuchar música.
+
+### El camino largo: tu propia copia
+
+Es gratis, tarda diez minutos y no depende de la página de nadie.
 
 ## 1. Crear tu app de Spotify
 

@@ -17,6 +17,7 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => !!getStoredToken());
   const [ready, setReady] = useState(false);
   const [loginError, setLoginError] = useState<string>();
+  const [demo, setDemo] = useState(false);
   const [theme, setTheme] = usePersistedState<string>("radiostatio_theme", "dark");
   const [accent, setAccent] = usePersistedState("radiostatio_accent", ACCENTS[0].value);
   const [body, setBody] = usePersistedState("radiostatio_body", BODIES[0].value);
@@ -44,7 +45,19 @@ export default function App() {
         body={body}
         onBodyChange={setBody}
       />
-      {loggedIn ? <Player style={playerStyle} onStyleChange={setPlayerStyle} /> : <Login error={loginError} />}
+      {loggedIn ? (
+        <Player style={playerStyle} onStyleChange={setPlayerStyle} />
+      ) : demo ? (
+        <>
+          <div className="demo-bar">
+            <span>Estás probando el aparato sin cuenta: no suena música.</span>
+            <button onClick={() => setDemo(false)}>Salir del demo</button>
+          </div>
+          <Player style={playerStyle} onStyleChange={setPlayerStyle} demo />
+        </>
+      ) : (
+        <Login error={loginError} onDemo={() => setDemo(true)} />
+      )}
     </div>
   );
 }
