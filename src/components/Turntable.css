@@ -9,7 +9,12 @@
   border-radius: 6px;
   background:
     radial-gradient(120% 80% at 20% 0%, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(172deg, #2a2a2d 0%, #202023 55%, #151517 100%);
+    linear-gradient(
+      172deg,
+      color-mix(in srgb, var(--body, #1f5aa8) 32%, #2a2a2d) 0%,
+      color-mix(in srgb, var(--body, #1f5aa8) 26%, #1c1c1f) 55%,
+      color-mix(in srgb, var(--body, #1f5aa8) 18%, #121214) 100%
+    );
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     inset 0 0 0 1px rgba(0, 0, 0, 0.6),
@@ -246,7 +251,11 @@
   height: 22px;
   border: none;
   border-radius: 3px;
-  background: linear-gradient(180deg, #34383d 0%, #1b1d21 100%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--body, #1f5aa8) 22%, #34383d) 0%,
+    color-mix(in srgb, var(--body, #1f5aa8) 16%, #1b1d21) 100%
+  );
   color: rgba(255, 255, 255, 0.72);
   display: flex;
   align-items: center;

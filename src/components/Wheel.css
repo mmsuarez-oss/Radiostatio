@@ -9,7 +9,13 @@
   gap: 18px;
   padding: 14px 14px 20px;
   border-radius: 14px;
-  background: linear-gradient(170deg, #fbfbfc 0%, #dcdde0 28%, #c3c5ca 70%, #aeb0b6 100%);
+  background: linear-gradient(
+    170deg,
+    color-mix(in srgb, var(--body, #1f5aa8) 7%, #fbfbfc) 0%,
+    color-mix(in srgb, var(--body, #1f5aa8) 14%, #dcdde0) 28%,
+    color-mix(in srgb, var(--body, #1f5aa8) 20%, #c3c5ca) 70%,
+    color-mix(in srgb, var(--body, #1f5aa8) 26%, #aeb0b6) 100%
+  );
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     inset 0 0 0 1px rgba(0, 0, 0, 0.18),
@@ -99,7 +105,12 @@
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: linear-gradient(175deg, #fdfdfd 0%, #ececed 45%, #dcdcde 100%);
+  background: linear-gradient(
+    175deg,
+    color-mix(in srgb, var(--body, #1f5aa8) 5%, #fdfdfd) 0%,
+    color-mix(in srgb, var(--body, #1f5aa8) 10%, #ececed) 45%,
+    color-mix(in srgb, var(--body, #1f5aa8) 15%, #dcdcde) 100%
+  );
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.9),
     inset 0 0 0 1px rgba(0, 0, 0, 0.12),
