@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPlayer, type NowPlaying } from "../spotify/player";
 import { createDemoPlayer } from "../spotify/demoPlayer";
+import { createLocalPlayer } from "../localPlayer";
 import { setSfxVolume } from "../sfx";
 import { formatTime } from "../format";
 import { Wheel } from "./Wheel";
@@ -42,18 +43,29 @@ const HINTS: Record<PlayerStyle, string> = {
 interface PlayerProps {
   style: PlayerStyle;
   onStyleChange: (style: PlayerStyle) => void;
-  /** Sin cuenta: aparato de juguete, para mirarlo funcionar. */
-  demo?: boolean;
+  /** spotify: la cuenta real. demo: aparato de juguete. local: archivos del usuario. */
+  mode?: PlayerMode;
 }
 
-export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
+export type PlayerMode = "spotify" | "demo" | "local";
+
+const CONNECT = {
+  spotify: createPlayer,
+  demo: createDemoPlayer,
+  local: createLocalPlayer,
+};
+
+export function Player({ style, onStyleChange, mode = "spotify" }: PlayerProps) {
   const [track, setTrack] = useState<NowPlaying | null>(null);
   const [volume, setVolume] = useState(0.6);
   const [lyricsOpen, setLyricsOpen] = useState(false);
   const [progressMs, setProgressMs] = useState(0);
   const [spinTrigger, setSpinTrigger] = useState(0);
   const [playerError, setPlayerError] = useState("");
-  const controlsRef = useRef<Awaited<ReturnType<typeof createPlayer>> | null>(null);
+  // loadFiles solo lo trae el modo local; el resto de la forma es común.
+  const controlsRef = useRef<
+    (Awaited<ReturnType<typeof createPlayer>> & { loadFiles?: (files: FileList) => number }) | null
+  >(null);
   const trackRef = useRef<NowPlaying | null>(null);
   const anchorRef = useRef({ position: 0, timestamp: Date.now() });
   const pendingAnimRef = useRef<PlayerStyle | null>(null);
@@ -62,7 +74,7 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
 
   useEffect(() => {
     let cancelled = false;
-    const connect = demo ? createDemoPlayer : createPlayer;
+    const connect = CONNECT[mode];
     connect((state) => {
       if (cancelled) return;
       // Fire the selection animation only once the real track data has actually
@@ -88,7 +100,7 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
       controlsRef.current?.disconnect();
       controlsRef.current = null;
     };
-  }, [demo]);
+  }, [mode]);
 
   // El aviso de error se va solo: si la siguiente canción suena, ya no aplica.
   useEffect(() => {
@@ -202,7 +214,7 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
   };
 
   // La biblioteca pide cuenta: en el demo no va
-  const library = !demo && (
+  const library = mode === "spotify" && (
     <LibraryPanel
       style={style}
       albumUri={track?.albumUri ?? ""}
@@ -212,6 +224,33 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
       onSelectTrack={playTrack}
       alwaysOpen={wide}
     />
+  );
+
+  const vacio =
+    mode === "local"
+      ? { titulo: "Elegí tu música", sub: "archivos de tu disco, sin cuenta ni internet" }
+      : { titulo: "Conecta Spotify", sub: "y dale play desde cualquier dispositivo" };
+
+  const picker = mode === "local" && (
+    <div className="local-picker">
+      <label className="local-picker__button">
+        {track ? "Elegir otra música" : "Elegir mi música"}
+        <input
+          type="file"
+          multiple
+          accept="audio/*"
+          onChange={(e) => {
+            const files = e.currentTarget.files;
+            if (!files?.length) return;
+            const cuantos = controlsRef.current?.loadFiles?.(files) ?? 0;
+            if (!cuantos) setPlayerError("No encontré archivos de audio entre los que elegiste.");
+          }}
+        />
+      </label>
+      <p className="local-picker__note">
+        Suena desde tu disco: sin cuenta, sin Premium y sin internet. No sale nada de este aparato.
+      </p>
+    </div>
   );
 
   const deck = (
@@ -238,8 +277,8 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
 
       {style === "turntable" && (
         <div className="player__info">
-          <p className="player__title">{track?.name ?? "Conecta Spotify"}</p>
-          <p className="player__artist">{track?.artists ?? "y dale play desde cualquier dispositivo"}</p>
+          <p className="player__title">{track?.name ?? vacio.titulo}</p>
+          <p className="player__artist">{track?.artists ?? vacio.sub}</p>
         </div>
       )}
       {/* El casete lleva la portada en la etiqueta y el CD en el visor: acá va
@@ -247,8 +286,8 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
       {style === "cassette" && (
         <div className="player__now-playing">
           <div className="player__info player__info--left">
-            <p className="player__title">{track?.name ?? "Conecta Spotify"}</p>
-            <p className="player__artist">{track?.artists ?? "y dale play desde cualquier dispositivo"}</p>
+            <p className="player__title">{track?.name ?? vacio.titulo}</p>
+            <p className="player__artist">{track?.artists ?? vacio.sub}</p>
           </div>
         </div>
       )}
@@ -333,7 +372,7 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
       <VolumeSlider value={volume} onChange={applyVolume} />
 
       {/* En el celular la letra va plegada; solo se pide a LRCLIB cuando se abre. */}
-      {!wide && !demo && (
+      {!wide && mode === "spotify" && (
         <details className="library-panel lyrics-fold" onToggle={(e) => setLyricsOpen(e.currentTarget.open)}>
           <summary className="library-panel__summary">
             <span className="library-panel__summary-text">Letra</span>
@@ -343,7 +382,7 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
         </details>
       )}
 
-      {!wide && library}
+      {!wide && (library || picker)}
     </div>
   );
 
@@ -362,7 +401,7 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
     <div className="rack">
       {taskbar}
       <aside className="rack__side">
-        {library || (
+        {library || picker || (
           <p className="rack__demo-note">Con tu cuenta de Spotify, acá va tu biblioteca: discos, playlists y Tus me gusta.</p>
         )}
       </aside>
@@ -373,8 +412,12 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
       </div>
 
       <aside className="rack__side rack__side--right">
-        {demo ? (
-          <p className="rack__demo-note">Con tu cuenta, acá van la letra de lo que suena, lo que sigue y a qué parlante mandarlo.</p>
+        {mode !== "spotify" ? (
+          <p className="rack__demo-note">
+            {mode === "local"
+              ? "La letra y la cola salen de Spotify: con tu cuenta, acá aparecen."
+              : "Con tu cuenta, acá van la letra de lo que suena, lo que sigue y a qué parlante mandarlo."}
+          </p>
         ) : (
           <>
             <Lyrics {...lyricsProps} />

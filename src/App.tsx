@@ -18,7 +18,7 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(() => !!getStoredToken());
   const [ready, setReady] = useState(false);
   const [loginError, setLoginError] = useState<string>();
-  const [demo, setDemo] = useState(false);
+  const [guest, setGuest] = useState<"demo" | "local" | null>(null);
   const [theme, setTheme] = usePersistedState<string>("radiostatio_theme", "dark");
   const [accent, setAccent] = usePersistedState("radiostatio_accent", ACCENTS[0].value);
   const [body, setBody] = usePersistedState("radiostatio_body", BODIES[0].value);
@@ -68,16 +68,20 @@ export default function App() {
       />
       {loggedIn ? (
         <Player style={playerStyle} onStyleChange={setPlayerStyle} />
-      ) : demo ? (
+      ) : guest ? (
         <>
           <div className="demo-bar">
-            <span>Estás probando el aparato sin cuenta: no suena música.</span>
-            <button onClick={() => setDemo(false)}>Salir del demo</button>
+            <span>
+              {guest === "demo"
+                ? "Estás probando el aparato sin cuenta: no suena música."
+                : "Suena tu propia música, desde tu disco: sin cuenta y sin internet."}
+            </span>
+            <button onClick={() => setGuest(null)}>Salir</button>
           </div>
-          <Player style={playerStyle} onStyleChange={setPlayerStyle} demo />
+          <Player style={playerStyle} onStyleChange={setPlayerStyle} mode={guest} />
         </>
       ) : (
-        <Login error={loginError} onDemo={() => setDemo(true)} />
+        <Login error={loginError} onDemo={() => setGuest("demo")} onLocal={() => setGuest("local")} />
       )}
     </div>
   );

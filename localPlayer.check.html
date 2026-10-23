@@ -1,0 +1,80 @@
+<!doctype html>
+<!-- Chequeo del reproductor local. Correr "npm run dev" y abrir
+     http://127.0.0.1:5173/localPlayer.check.html — no entra en el build,
+     Vite solo empaqueta index.html. -->
+<meta charset="utf-8" />
+<title>Chequeo del reproductor local</title>
+<body style="font: 14px/1.6 monospace; padding: 24px; background: #111; color: #ddd">
+  <pre id="out">corriendo…</pre>
+  <script type="module">
+    const out = document.getElementById("out");
+    const lineas = [];
+    let malas = 0;
+    const comprobar = (nombre, real, esperado) => {
+      const ok = JSON.stringify(real) === JSON.stringify(esperado);
+      if (!ok) malas++;
+      lineas.push(`${ok ? "✓" : "✗"} ${nombre}` + (ok ? "" : `\n   esperaba ${JSON.stringify(esperado)}\n   recibió  ${JSON.stringify(real)}`));
+    };
+
+    // WAV real y corto: el <audio> tiene que poder decodificarlo de verdad.
+    function wav(freq, segs) {
+      const sr = 8000, n = Math.round(sr * segs), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+      const str = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+      str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVEfmt ");
+      v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+      v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true);
+      v.setUint16(34, 16, true); str(36, "data"); v.setUint32(40, n * 2, true);
+      for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.sin((i / sr) * freq * 6.283) * 16000, true);
+      return new Blob([buf], { type: "audio/wav" });
+    }
+
+    const nombres = ["10 - A - Diez.wav", "2 - A - Dos.wav", "1 - A - Uno.wav", "1 - B - Beta.wav", "notas.txt"];
+    const dt = new DataTransfer();
+    nombres.forEach((n, i) =>
+      dt.items.add(new File([wav(200 + i * 90, 0.3)], n, { type: n.endsWith("txt") ? "text/plain" : "audio/wav" })),
+    );
+
+    const { createLocalPlayer } = await import("/src/localPlayer.ts");
+    const vistos = [];
+    const ctl = await createLocalPlayer((s) => vistos.push(s));
+    const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+    const ahora = () => vistos.at(-1);
+
+    comprobar("descarta lo que no es audio", ctl.loadFiles(dt.files), 4);
+    await espera(250);
+
+    comprobar("saca artista y título del nombre", [ahora().name, ahora().artists], ["Uno", "A"]);
+    comprobar("sin carpeta, el álbum sale del artista", ahora().albumName, "A");
+    comprobar("lee la duración del archivo", Math.round(ahora().duration), 300);
+    comprobar("arranca en pausa", ahora().isPaused, true);
+
+    const orden = [ahora().name], albumes = [ahora().albumName];
+    for (let i = 0; i < 3; i++) {
+      await ctl.nextTrack();
+      await espera(180);
+      orden.push(ahora().name);
+      albumes.push(ahora().albumName);
+    }
+    comprobar("ordena por pista, no alfabético, y la 10 va al final", orden, ["Uno", "Dos", "Diez", "Beta"]);
+    comprobar("no entrevera los álbumes", albumes, ["A", "A", "A", "B"]);
+
+    await ctl.nextTrack();
+    await espera(180);
+    comprobar("del último vuelve al primero", ahora().name, "Uno");
+
+    await ctl.togglePlay();
+    await espera(150);
+    comprobar("suena al dar play", ahora().isPaused, false);
+
+    // El tema dura 0.3s: al terminar tiene que pasar solo al siguiente.
+    await espera(500);
+    comprobar("al terminar pasa solo al siguiente", [ahora().name, ahora().isPaused], ["Dos", false]);
+
+    await ctl.setShuffle(true);
+    comprobar("el aleatorio queda marcado", ahora().shuffle, true);
+    ctl.disconnect();
+
+    out.textContent = lineas.join("\n") + `\n\n${malas ? `${malas} FALLARON` : "todo bien"}`;
+    out.style.color = malas ? "#f66" : "#8d8";
+  </script>
+</body>

@@ -4,7 +4,7 @@ import type { NowPlaying } from "./player";
 // pueda probar el aparato sin cuenta. No suena música: solo los ruidos
 // mecánicos de las carcasas, que son nuestros.
 
-const cover = (hue: number) =>
+export const cover = (hue: number) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">` +
       `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">` +

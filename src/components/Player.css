@@ -218,3 +218,36 @@
     padding: 16px;
   }
 }
+
+/* El selector de archivos ocupa la ranura de la biblioteca, así que hereda su
+   ancho; el input nativo se esconde detrás del label. */
+.local-picker {
+  margin: 24px 10px;
+  text-align: center;
+}
+
+.local-picker__button {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 22px;
+  background: var(--accent, #e3b765);
+  color: #1a1308;
+  font-family: "Permanent Marker", cursive;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.local-picker__button:hover {
+  filter: brightness(1.08);
+}
+
+.local-picker__button input {
+  display: none;
+}
+
+.local-picker__note {
+  margin: 14px 4px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-faint, #707072);
+}

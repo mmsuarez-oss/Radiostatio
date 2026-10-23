@@ -11,9 +11,10 @@ const MESSAGES: Record<string, string> = {
 interface LoginProps {
   error?: string;
   onDemo: () => void;
+  onLocal: () => void;
 }
 
-export function Login({ error, onDemo }: LoginProps) {
+export function Login({ error, onDemo, onLocal }: LoginProps) {
   const [clientId, setValue] = useState(getStoredClientId);
 
   function connectWithOwnApp(e: React.FormEvent) {
@@ -31,6 +32,10 @@ export function Login({ error, onDemo }: LoginProps) {
 
       <button className="login-button" onClick={() => redirectToLogin()}>
         Conectar con Spotify
+      </button>
+
+      <button className="login-demo" onClick={onLocal}>
+        Poner mi propia música
       </button>
 
       <button className="login-demo" onClick={onDemo}>
