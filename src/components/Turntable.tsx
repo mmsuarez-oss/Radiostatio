@@ -28,7 +28,7 @@ export function Turntable({
     if (spinTrigger === 0) return;
     playSfx("vinyl-stop", { volume: 0.5 });
     setSelecting(true);
-    const t = setTimeout(() => setSelecting(false), 700);
+    const t = setTimeout(() => setSelecting(false), 900); // coincide con turntable-select
     return () => clearTimeout(t);
   }, [spinTrigger]);
 

@@ -16,9 +16,9 @@ export const cover = (hue: number) =>
   )}`;
 
 const TRACKS = [
-  { name: "Grace", album: "Demo", hue: 28, duration: 183_000 },
-  { name: "Grace (lado B)", album: "Demo", hue: 200, duration: 214_000 },
-  { name: "Grace (toma 3)", album: "Otro demo", hue: 320, duration: 167_000 },
+  { name: "Prueba de sonido", album: "Grace", hue: 28, duration: 183_000 },
+  { name: "Lado B", album: "Grace", hue: 200, duration: 214_000 },
+  { name: "Toma 3", album: "Grace vol. 2", hue: 320, duration: 167_000 },
 ];
 
 export async function createDemoPlayer(onStateChange: (state: NowPlaying) => void, _onError?: (message: string) => void) {

@@ -55,6 +55,8 @@
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at 50% 50%, #1a1a1c 0 92%, #b9bcc2 93% 100%);
+  /* Sin perspectiva el volteo del disco se ve como un aplastado, no como un giro */
+  perspective: 620px;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.7),
     0 6px 16px rgba(0, 0, 0, 0.55);
@@ -71,7 +73,7 @@
 }
 
 .turntable__record--selecting {
-  animation: turntable-select 0.7s ease-out;
+  animation: turntable-select 0.9s cubic-bezier(0.3, 0, 0.3, 1);
 }
 
 .turntable__record--spinning {
@@ -86,16 +88,16 @@
 
 @keyframes turntable-select {
   0% {
-    transform: scale(0.7) rotate3d(0.25, 1, 0, 0deg);
-    opacity: 0.3;
+    transform: translateY(0) scale(1) rotate3d(0.12, 1, 0, 0deg);
   }
-  55% {
-    transform: scale(1.08) rotate3d(0.25, 1, 0, 420deg);
-    opacity: 1;
+  40% {
+    transform: translateY(-30px) scale(0.82) rotate3d(0.12, 1, 0, 340deg);
+  }
+  75% {
+    transform: translateY(-16px) scale(0.9) rotate3d(0.12, 1, 0, 600deg);
   }
   100% {
-    transform: scale(1) rotate3d(0.25, 1, 0, 720deg);
-    opacity: 1;
+    transform: translateY(0) scale(1) rotate3d(0.12, 1, 0, 720deg);
   }
 }
 
