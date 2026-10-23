@@ -34,14 +34,24 @@
       dt.items.add(new File([wav(200 + i * 90, 0.3)], n, { type: n.endsWith("txt") ? "text/plain" : "audio/wav" })),
     );
 
-    const { createLocalPlayer } = await import("/src/localPlayer.ts");
+    const { createLocalPlayer, albumesDe } = await import("/src/localPlayer.ts");
     const vistos = [];
     const ctl = await createLocalPlayer((s) => vistos.push(s));
     const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+    // Esperar una condición y no un plazo fijo: en arranque frío el
+    // loadedmetadata del primer archivo llega tarde y el chequeo parpadeaba.
+    const esperarA = async (cond, limite = 3000) => {
+      const fin = performance.now() + limite;
+      while (performance.now() < fin) {
+        if (cond()) return true;
+        await espera(25);
+      }
+      return false;
+    };
     const ahora = () => vistos.at(-1);
 
-    comprobar("descarta lo que no es audio", ctl.loadFiles(dt.files), 4);
-    await espera(250);
+    comprobar("descarta lo que no es audio", ctl.loadFiles(dt.files).length, 4);
+    comprobar("llega la duración del primer tema", await esperarA(() => vistos.length && ahora().duration > 0), true);
 
     comprobar("saca artista y título del nombre", [ahora().name, ahora().artists], ["Uno", "A"]);
     comprobar("sin carpeta, el álbum sale del artista", ahora().albumName, "A");
@@ -50,8 +60,9 @@
 
     const orden = [ahora().name], albumes = [ahora().albumName];
     for (let i = 0; i < 3; i++) {
+      const previo = ahora().trackUri;
       await ctl.nextTrack();
-      await espera(180);
+      await esperarA(() => ahora().trackUri !== previo);
       orden.push(ahora().name);
       albumes.push(ahora().albumName);
     }
@@ -59,7 +70,7 @@
     comprobar("no entrevera los álbumes", albumes, ["A", "A", "A", "B"]);
 
     await ctl.nextTrack();
-    await espera(180);
+    await esperarA(() => ahora().name === "Uno");
     comprobar("del último vuelve al primero", ahora().name, "Uno");
 
     await ctl.togglePlay();
@@ -67,9 +78,12 @@
     comprobar("suena al dar play", ahora().isPaused, false);
 
     // El tema dura 0.3s: al terminar tiene que pasar solo al siguiente.
-    await espera(500);
+    await esperarA(() => ahora().name === "Dos", 4000);
     comprobar("al terminar pasa solo al siguiente", [ahora().name, ahora().isPaused], ["Dos", false]);
 
+
+    comprobar("agrupa los álbumes para la estantería", albumesDe(ctl.loadFiles(dt.files)).map((a) => a.name), ["A", "B"]);
+    await espera(250);
     await ctl.setShuffle(true);
     comprobar("el aleatorio queda marcado", ahora().shuffle, true);
     ctl.disconnect();

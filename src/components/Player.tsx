@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPlayer, type NowPlaying } from "../spotify/player";
 import { createDemoPlayer } from "../spotify/demoPlayer";
-import { createLocalPlayer } from "../localPlayer";
+import { albumesDe, createLocalPlayer, type LocalTrack } from "../localPlayer";
+import { elegirCarpeta, hayCarpetas, reabrirCarpeta, recuperarCarpeta, type Entrada } from "../localFolder";
+import { LibraryShelf } from "./LibraryShelf";
 import { setSfxVolume } from "../sfx";
 import { formatTime } from "../format";
 import { Wheel } from "./Wheel";
@@ -62,9 +64,16 @@ export function Player({ style, onStyleChange, mode = "spotify" }: PlayerProps) 
   const [progressMs, setProgressMs] = useState(0);
   const [spinTrigger, setSpinTrigger] = useState(0);
   const [playerError, setPlayerError] = useState("");
-  // loadFiles solo lo trae el modo local; el resto de la forma es común.
+  const [localTracks, setLocalTracks] = useState<LocalTrack[]>([]);
+  // pendiente: Chrome recuerda la carpeta pero pide un click para volver a leerla.
+  const [carpeta, setCarpeta] = useState<{ nombre: string; pendiente?: boolean }>();
+  // cargar y loadFiles solo los trae el modo local; el resto es la forma común.
   const controlsRef = useRef<
-    (Awaited<ReturnType<typeof createPlayer>> & { loadFiles?: (files: FileList) => number }) | null
+    | (Awaited<ReturnType<typeof createPlayer>> & {
+        cargar?: (entradas: Entrada[]) => LocalTrack[];
+        loadFiles?: (files: FileList) => LocalTrack[];
+      })
+    | null
   >(null);
   const trackRef = useRef<NowPlaying | null>(null);
   const anchorRef = useRef({ position: 0, timestamp: Date.now() });
@@ -89,11 +98,20 @@ export function Player({ style, onStyleChange, mode = "spotify" }: PlayerProps) 
       }
     }, (message) => {
       if (!cancelled) setPlayerError(message);
-    }).then((controls) => {
+    }).then((recien) => {
       // Un reproductor que nadie usa sigue conectado a Spotify como dispositivo
       // fantasma y puede quedarse con la música: se desconecta.
-      if (cancelled) controls.disconnect();
-      else controlsRef.current = controls;
+      if (cancelled) return recien.disconnect();
+      const controls = recien as NonNullable<typeof controlsRef.current>;
+      controlsRef.current = controls;
+      // La carpeta se restaura acá y no en su propio efecto, para no competir
+      // con la conexión: cargar() no existe hasta que el reproductor está.
+      if (mode !== "local" || !controls.cargar) return;
+      recuperarCarpeta().then((guardada) => {
+        if (cancelled || !guardada) return;
+        setCarpeta({ nombre: guardada.nombre, pendiente: !("entradas" in guardada) });
+        if ("entradas" in guardada) setLocalTracks(controls.cargar!(guardada.entradas));
+      });
     });
     return () => {
       cancelled = true;
@@ -231,25 +249,67 @@ export function Player({ style, onStyleChange, mode = "spotify" }: PlayerProps) 
       ? { titulo: "Elegí tu música", sub: "archivos de tu disco, sin cuenta ni internet" }
       : { titulo: "Conecta Spotify", sub: "y dale play desde cualquier dispositivo" };
 
+  const localAlbums = useMemo(() => albumesDe(localTracks), [localTracks]);
+
+  function aplicar(tracks: LocalTrack[]) {
+    setLocalTracks(tracks);
+    if (!tracks.length) setPlayerError("No encontré archivos de audio ahí.");
+  }
+
+  async function abrirCarpeta(volver: boolean) {
+    const elegida = await (volver ? reabrirCarpeta() : elegirCarpeta());
+    if (!elegida) return;
+    setCarpeta({ nombre: elegida.nombre });
+    aplicar(controlsRef.current?.cargar?.(elegida.entradas) ?? []);
+  }
+
+  const sueltos = (
+    <label className="local-picker__sueltos">
+      {hayCarpetas() ? "o elegir archivos sueltos" : localTracks.length ? "Elegir otra música" : "Elegir mi música"}
+      <input
+        type="file"
+        multiple
+        accept="audio/*"
+        onChange={(e) => {
+          const files = e.currentTarget.files;
+          if (!files?.length) return;
+          setCarpeta(undefined);
+          aplicar(controlsRef.current?.loadFiles?.(files) ?? []);
+        }}
+      />
+    </label>
+  );
+
   const picker = mode === "local" && (
     <div className="local-picker">
-      <label className="local-picker__button">
-        {track ? "Elegir otra música" : "Elegir mi música"}
-        <input
-          type="file"
-          multiple
-          accept="audio/*"
-          onChange={(e) => {
-            const files = e.currentTarget.files;
-            if (!files?.length) return;
-            const cuantos = controlsRef.current?.loadFiles?.(files) ?? 0;
-            if (!cuantos) setPlayerError("No encontré archivos de audio entre los que elegiste.");
-          }}
-        />
-      </label>
+      {hayCarpetas() ? (
+        <button className="local-picker__button" onClick={() => abrirCarpeta(false)}>
+          {carpeta && !carpeta.pendiente ? "Elegir otra carpeta" : "Elegir mi carpeta de música"}
+        </button>
+      ) : (
+        <span className="local-picker__button">{sueltos}</span>
+      )}
+
+      {carpeta?.pendiente && (
+        <button className="local-picker__again" onClick={() => abrirCarpeta(true)}>
+          Volver a abrir «{carpeta.nombre}»
+        </button>
+      )}
+      {carpeta && !carpeta.pendiente && (
+        <p className="local-picker__carpeta">
+          {carpeta.nombre} · {localTracks.length} {localTracks.length === 1 ? "tema" : "temas"}
+        </p>
+      )}
+
+      {hayCarpetas() && sueltos}
+
       <p className="local-picker__note">
-        Suena desde tu disco: sin cuenta, sin Premium y sin internet. No sale nada de este aparato.
+        {hayCarpetas()
+          ? "Suena desde tu disco, sin cuenta ni internet. La carpeta queda recordada para la próxima."
+          : "Suena desde tu disco, sin cuenta ni internet. Tu navegador no recuerda carpetas, así que hay que elegirlos cada vez."}
       </p>
+
+      {localAlbums.length > 0 && <LibraryShelf style={style} items={localAlbums} onSelect={playAlbum} />}
     </div>
   );
 

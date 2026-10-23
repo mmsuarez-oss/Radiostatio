@@ -251,3 +251,42 @@
   line-height: 1.5;
   color: var(--text-faint, #707072);
 }
+
+.local-picker__button input,
+.local-picker__sueltos input {
+  display: none;
+}
+
+.local-picker__button {
+  border: none;
+  font: inherit;
+  font-family: "Permanent Marker", cursive;
+}
+
+.local-picker__again {
+  display: block;
+  margin: 10px auto 0;
+  padding: 7px 14px;
+  border: 1px solid var(--accent, #e3b765);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--accent, #e3b765);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.local-picker__carpeta {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--text-faint, #707072);
+}
+
+.local-picker__sueltos {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-faint, #707072);
+  text-decoration: underline;
+  cursor: pointer;
+}

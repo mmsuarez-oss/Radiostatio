@@ -1,4 +1,6 @@
 import { cover } from "./spotify/demoPlayer";
+import type { Entrada } from "./localFolder";
+import type { LibraryItem } from "./spotify/library";
 import type { NowPlaying } from "./spotify/player";
 
 // Tercera implementación de la misma forma que createPlayer y createDemoPlayer,
@@ -26,32 +28,32 @@ function hue(text: string) {
 // el nombre entero queda como título: es mejor que inventar un artista.
 // El álbum ordena las carcasas (el casete se cambia cuando cambia), así que a
 // falta de carpeta se agrupa por artista y no todo en una sola pila.
-function parse(file: File) {
+function parse({ file, path }: Entrada) {
   const base = file.name.replace(/\.[^.]+$/, "").replace(/^\d+\s*[-._)]\s*/, "");
-  const folders = file.webkitRelativePath.split("/").slice(0, -1);
+  const folders = path.split("/").slice(0, -1);
   const parts = base.split(" - ");
   const artists = parts.length >= 2 ? parts[0].trim() : (folders.at(-2) ?? "Desconocido");
   const name = parts.length >= 2 ? parts.slice(1).join(" - ").trim() : base;
   return { artists, name, albumName: folders.at(-1) ?? (parts.length >= 2 ? artists : "Mi música") };
 }
 
-export function toTracks(files: File[]): LocalTrack[] {
-  return files
-    .filter((f) => f.type.startsWith("audio/") || AUDIO.test(f.name))
-    .map((file) => {
-      const { artists, name, albumName } = parse(file);
+export function toTracks(entradas: Entrada[]): LocalTrack[] {
+  return entradas
+    .filter((e) => e.file.type.startsWith("audio/") || AUDIO.test(e.file.name))
+    .map((entrada) => {
+      const { artists, name, albumName } = parse(entrada);
       return {
         name,
         artists,
         albumName,
         albumUri: `local:album:${albumName}`,
-        url: URL.createObjectURL(file),
-        path: file.webkitRelativePath || file.name,
+        url: URL.createObjectURL(entrada.file),
+        path: entrada.path,
       };
     })
     // Primero el álbum, para que un disco no quede entreverado con otro, y
-    // dentro por nombre de archivo: ahí vive el número de pista, que ordenar
-    // por título perdía. Con numeric, además, la 10 va después de la 2.
+    // dentro por ruta: ahí vive el número de pista, que ordenar por título
+    // perdía. Con numeric, además, la 10 va después de la 2.
     .sort((a, b) => a.albumUri.localeCompare(b.albumUri) || a.path.localeCompare(b.path, undefined, { numeric: true }))
     .map((t, i) => ({
       name: t.name,
@@ -62,6 +64,26 @@ export function toTracks(files: File[]): LocalTrack[] {
       trackUri: `local:track:${i}`,
     }));
 }
+
+/** Los álbumes con la forma que ya sabe dibujar LibraryShelf. */
+export function albumesDe(tracks: LocalTrack[]): LibraryItem[] {
+  const porUri = new Map<string, LibraryItem>();
+  for (const t of tracks) {
+    if (porUri.has(t.albumUri)) continue;
+    porUri.set(t.albumUri, {
+      uri: t.albumUri,
+      name: t.albumName,
+      subtitle: t.artists,
+      image: cover(hue(t.albumName)),
+      kind: "album",
+    });
+  }
+  return [...porUri.values()];
+}
+
+/** Un <input type=file> no da rutas salvo que se haya elegido una carpeta. */
+export const entradasDe = (files: FileList): Entrada[] =>
+  [...files].map((file) => ({ file, path: file.webkitRelativePath || file.name }));
 
 export async function createLocalPlayer(
   onStateChange: (state: NowPlaying) => void,
@@ -129,6 +151,14 @@ export async function createLocalPlayer(
   audio.addEventListener("pause", emit);
   audio.addEventListener("ended", () => go(1, true));
 
+  function cargar(entradas: Entrada[]) {
+    tracks.forEach((t) => URL.revokeObjectURL(t.url));
+    tracks = toTracks(entradas);
+    rebuild();
+    if (tracks.length) load(0, false);
+    return tracks;
+  }
+
   function jumpTo(index: number) {
     if (index >= 0) load(queue.indexOf(index), true);
   }
@@ -166,16 +196,9 @@ export async function createLocalPlayer(
       tracks = [];
     },
 
-    // Fuera de la forma común: solo el modo local recibe archivos.
-    // ponytail: los File no sobreviven al reload, así que la lista se vuelve a
-    // elegir cada vez. Si molesta, showDirectoryPicker() + IndexedDB guarda el
-    // permiso de la carpeta, pero solo en Chromium.
-    loadFiles: (files: FileList) => {
-      tracks.forEach((t) => URL.revokeObjectURL(t.url));
-      tracks = toTracks([...files]);
-      rebuild();
-      if (tracks.length) load(0, false);
-      return tracks.length;
-    },
+    // Fuera de la forma común: solo el modo local recibe archivos. Las rutas
+    // vienen aparte porque un handle de carpeta no las trae en el File.
+    cargar,
+    loadFiles: (files: FileList) => cargar(entradasDe(files)),
   };
 }
