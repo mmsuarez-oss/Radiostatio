@@ -78,6 +78,7 @@ export default function App() {
             </span>
             <button onClick={() => setGuest(null)}>Salir</button>
           </div>
+          {guest === "demo" && <span className="demo-sello">Demo</span>}
           <Player style={playerStyle} onStyleChange={setPlayerStyle} mode={guest} />
         </>
       ) : (

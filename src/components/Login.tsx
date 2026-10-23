@@ -42,6 +42,10 @@ export function Login({ error, onDemo, onLocal }: LoginProps) {
         Probarlo sin cuenta
       </button>
 
+      <a className="login-apk" href="/radiostatio.apk" download>
+        Bajar la app para Android <span>0,9 MB</span>
+      </a>
+
       <details className="login-own">
         <summary>No me deja entrar / quiero usar mi propia app</summary>
         <p className="login-note">

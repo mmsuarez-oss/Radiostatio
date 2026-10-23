@@ -3,8 +3,8 @@ import "./StyleSwitcher.css";
 export type PlayerStyle = "wheel" | "turntable" | "cd" | "cassette";
 
 const OPTIONS: { id: PlayerStyle; label: string }[] = [
-  { id: "wheel", label: "Rueda" },
-  { id: "turntable", label: "Tornamesa" },
+  { id: "wheel", label: "DAPs" },
+  { id: "turntable", label: "Tocadiscos" },
   { id: "cd", label: "CD" },
   { id: "cassette", label: "Casete" },
 ];

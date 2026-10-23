@@ -198,3 +198,48 @@
 .login-button:active {
   filter: brightness(0.95);
 }
+
+/* El sello de "Demo", a la izquierda de la columna de ajustes para no taparla. */
+.demo-sello {
+  position: fixed;
+  top: 64px;
+  right: 68px;
+  z-index: 9;
+  padding: 4px 14px 6px;
+  border: 3px solid var(--accent, #e3b765);
+  border-radius: 6px;
+  color: var(--accent, #e3b765);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.75;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .demo-sello {
+    top: 70px;
+    right: 54px;
+    font-size: 22px;
+    border-width: 2px;
+  }
+}
+
+/* El APK vive en public/: es la misma página envuelta en un TWA. */
+.login-apk {
+  display: block;
+  margin: 18px auto 0;
+  color: var(--text-muted, #a7a7a7);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.login-apk span {
+  opacity: 0.55;
+}
+
+.login-apk:hover {
+  color: var(--accent, #e3b765);
+}
