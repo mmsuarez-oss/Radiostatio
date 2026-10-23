@@ -71,7 +71,7 @@ export function logout() {
 
 export async function redirectToLogin() {
   const verifier = randomVerifier();
-  sessionStorage.setItem(VERIFIER_KEY, verifier);
+  localStorage.setItem(VERIFIER_KEY, verifier);
   const challenge = await challengeFor(verifier);
 
   const url = new URL("https://accounts.spotify.com/authorize");
@@ -125,7 +125,11 @@ export async function handleRedirectCallback(): Promise<RedirectResult> {
   const code = params.get("code");
   if (!code) return { loggedIn: false };
 
-  const verifier = sessionStorage.getItem(VERIFIER_KEY);
+  // En la APK de Android el login sale a un Custom Tab y vuelve: eso es otra
+  // pestaña, así que el verifier no sobrevive en sessionStorage. Es de un solo
+  // uso y se borra acá nomás, apenas se lee.
+  const verifier = localStorage.getItem(VERIFIER_KEY);
+  localStorage.removeItem(VERIFIER_KEY);
   if (!verifier) {
     clearQuery();
     return { loggedIn: false, error: "missing_verifier" };

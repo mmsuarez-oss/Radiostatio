@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "app.vercel.radiostatio.twa",
-      "sha256_cert_fingerprints": ["REEMPLAZAR_CON_EL_FINGERPRINT_DE_PWABUILDER"]
+      "sha256_cert_fingerprints": ["C0:A2:EA:C5:A8:6B:AB:FF:5F:7F:67:B9:19:5D:4B:B7:B7:6C:7C:47:B1:4F:E8:5C:FC:FC:7E:EC:70:E7:38:1E"]
     }
   }
 ]

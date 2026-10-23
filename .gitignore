@@ -26,3 +26,6 @@ dist-ssr
 
 .vercel
 .env*
+
+# APK, AAB y sobre todo la keystore con su contraseña: nada de esto va al repo.
+android/
