@@ -15,9 +15,31 @@ interface SpotifyAlbumItem {
 interface SpotifyPlaylistItem {
   uri: string;
   name: string;
-  tracks: { total: number } | null;
+  // En 2026 Spotify renombró `tracks` a `items`; según la app llega uno u otro.
+  items?: { total: number } | null;
+  tracks?: { total: number } | null;
   images: { url: string }[] | null;
+  owner?: { display_name: string | null } | null;
 }
+
+function toPlaylistItem(playlist: SpotifyPlaylistItem, subtitle?: string): LibraryItem {
+  return {
+    uri: playlist.uri,
+    name: playlist.name,
+    subtitle: subtitle ?? `${(playlist.items ?? playlist.tracks)?.total ?? 0} canciones`,
+    image: playlist.images?.[0]?.url ?? "",
+    kind: "playlist",
+  };
+}
+
+// Portada propia para "Tus me gusta": Spotify no da imagen para esa lista.
+const LIKED_COVER = `data:image/svg+xml,${encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">` +
+    `<stop offset="0" stop-color="#4b2bd6"/><stop offset="1" stop-color="#9fd3c7"/></linearGradient></defs>` +
+    `<rect width="300" height="300" fill="url(#g)"/>` +
+    `<path d="M150 214 86 152a38 38 0 0 1 64-46 38 38 0 0 1 64 46z" fill="#fff"/></svg>`,
+)}`;
 
 // ponytail: tope de 300 items por lista; si alguien tiene una biblioteca más
 // grande que eso, la estantería va a pedir virtualizar antes que más páginas.
@@ -56,18 +78,34 @@ export async function getOwnPlaylists(): Promise<LibraryItem[]> {
   const items = await fetchAllPages<SpotifyPlaylistItem | null>("https://api.spotify.com/v1/me/playlists?limit=50");
   return items
     .filter((playlist): playlist is SpotifyPlaylistItem => !!playlist)
-    .map((playlist) => ({
-      uri: playlist.uri,
-      name: playlist.name,
-      subtitle: `${playlist.tracks?.total ?? 0} canciones`,
-      image: playlist.images?.[0]?.url ?? "",
-      kind: "playlist" as const,
-    }));
+    .map((playlist) => toPlaylistItem(playlist));
+}
+
+/** "Tus me gusta" no viene en /me/playlists: se arma a mano con la colección del usuario. */
+export async function getLikedSongs(): Promise<LibraryItem> {
+  const token = await getValidAccessToken();
+  const headers = { Authorization: `Bearer ${token}` };
+  const [me, liked] = await Promise.all([
+    fetch("https://api.spotify.com/v1/me", { headers }),
+    fetch("https://api.spotify.com/v1/me/tracks?limit=1", { headers }),
+  ]);
+  if (!me.ok || !liked.ok) throw new Error(`Liked songs failed: ${me.status}/${liked.status}`);
+  const { id } = await me.json();
+  const { total } = await liked.json();
+  return {
+    uri: `spotify:user:${id}:collection`,
+    name: "Tus me gusta",
+    subtitle: `${total} canciones`,
+    image: LIKED_COVER,
+    kind: "playlist",
+  };
 }
 
 export async function getLibraryItems(): Promise<LibraryItem[]> {
-  const [albums, playlists] = await Promise.allSettled([getSavedAlbums(), getOwnPlaylists()]);
+  const [liked, albums, playlists] = await Promise.allSettled([getLikedSongs(), getSavedAlbums(), getOwnPlaylists()]);
+  // "Tus me gusta" primero, como en Spotify.
   const items = [
+    ...(liked.status === "fulfilled" ? [liked.value] : []),
     ...(albums.status === "fulfilled" ? albums.value : []),
     ...(playlists.status === "fulfilled" ? playlists.value : []),
   ];
@@ -128,10 +166,10 @@ interface SpotifySearchTrack extends SpotifyTrackItem {
 export async function searchCatalog(
   query: string,
   signal?: AbortSignal,
-): Promise<{ albums: LibraryItem[]; tracks: SearchTrack[] }> {
+): Promise<{ albums: LibraryItem[]; playlists: LibraryItem[]; tracks: SearchTrack[] }> {
   const token = await getValidAccessToken();
   const res = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album,track&limit=9`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=album,playlist,track&limit=9`,
     { headers: { Authorization: `Bearer ${token}` }, signal },
   );
   if (!res.ok) throw new Error(`Spotify search failed: ${res.status}`);
@@ -159,24 +197,39 @@ export async function searchCatalog(
       image: track.album.images.at(-1)?.url ?? "",
     }));
 
-  return { albums, tracks };
+  const playlists = ((json.playlists?.items ?? []) as (SpotifyPlaylistItem | null)[])
+    .filter((playlist): playlist is SpotifyPlaylistItem => !!playlist)
+    .map((playlist) => toPlaylistItem(playlist, playlist.owner?.display_name ?? "Playlist"));
+
+  return { albums, playlists, tracks };
+}
+
+// Sin deviceId suena en el dispositivo activo (el celular, si la música está allá).
+async function play(deviceId: string, body: object) {
+  const token = await getValidAccessToken();
+  return fetch(`https://api.spotify.com/v1/me/player/play${deviceId ? `?device_id=${deviceId}` : ""}`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }
 
 // Plays one track but keeps the album as context, so the rest of it follows on.
 export async function playTrackInAlbum(albumUri: string, trackUri: string, deviceId: string) {
-  const token = await getValidAccessToken();
-  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ context_uri: albumUri, offset: { uri: trackUri } }),
-  });
+  await play(deviceId, { context_uri: albumUri, offset: { uri: trackUri } });
 }
 
 export async function playContext(contextUri: string, deviceId: string) {
-  const token = await getValidAccessToken();
-  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ context_uri: contextUri }),
-  });
+  const res = await play(deviceId, { context_uri: contextUri });
+  // ponytail: si Spotify no acepta "Tus me gusta" como contexto, suenan las 50
+  // últimas que guardaste; paginar /me/tracks si alguien pide la lista entera.
+  if (!res.ok && contextUri.endsWith(":collection")) {
+    const token = await getValidAccessToken();
+    const liked = await fetch("https://api.spotify.com/v1/me/tracks?limit=50", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!liked.ok) return;
+    const { items } = (await liked.json()) as { items: { track: { uri: string } }[] };
+    await play(deviceId, { uris: items.map((item) => item.track.uri) });
+  }
 }

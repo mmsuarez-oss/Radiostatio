@@ -1,11 +1,12 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { getStoredToken, handleRedirectCallback } from "./spotify/auth";
+import { getStoredToken, handleRedirectCallback, logout } from "./spotify/auth";
 import { Login } from "./components/Login";
 import { Player } from "./components/Player";
 import { Settings } from "./components/Settings";
-import { ACCENTS, BODIES } from "./palettes";
+import { ACCENTS, BODIES, SKINS } from "./palettes";
 import type { PlayerStyle } from "./components/StyleSwitcher";
 import "./App.css";
+import "./compu.css";
 
 function usePersistedState<T extends string>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => (localStorage.getItem(key) as T) ?? initial);
@@ -21,6 +22,11 @@ export default function App() {
   const [theme, setTheme] = usePersistedState<string>("radiostatio_theme", "dark");
   const [accent, setAccent] = usePersistedState("radiostatio_accent", ACCENTS[0].value);
   const [body, setBody] = usePersistedState("radiostatio_body", BODIES[0].value);
+  // Antes la letra y las canciones se elegían por separado: quien tenía Compu 2000 en
+  // alguna de las dos arranca con la página entera en Compu 2000.
+  const hadCompu = [localStorage.getItem("radiostatio_lyrics_look"), localStorage.getItem("radiostatio_songs_look")].includes("compu");
+  const [storedSkin, setSkin] = usePersistedState("radiostatio_skin", hadCompu ? "compu" : SKINS[0].value);
+  const skin = SKINS.some((s) => s.value === storedSkin) ? storedSkin : SKINS[0].value;
   const [storedStyle, setPlayerStyle] = usePersistedState<PlayerStyle>("radiostatio_style", "wheel");
   // La radio se jubiló: a quien la tenía guardada le toca el reproductor de CD.
   const playerStyle = (storedStyle as string) === "radio" ? "cd" : storedStyle;
@@ -36,7 +42,11 @@ export default function App() {
   if (!ready) return null;
 
   return (
-    <div className="app" data-theme={theme} style={{ "--accent": accent, "--body": body } as CSSProperties}>
+    <div
+      className="app"
+      data-theme={theme}
+      data-skin={skin}
+      style={{ "--accent": accent, "--body": body } as CSSProperties}>
       <Settings
         theme={theme}
         onThemeChange={setTheme}
@@ -44,6 +54,17 @@ export default function App() {
         onAccentChange={setAccent}
         body={body}
         onBodyChange={setBody}
+        skin={skin}
+        onSkinChange={setSkin}
+        // Al salir se desmonta el reproductor, que se desconecta de Spotify al irse.
+        onLogout={
+          loggedIn
+            ? () => {
+                logout();
+                setLoggedIn(false);
+              }
+            : undefined
+        }
       />
       {loggedIn ? (
         <Player style={playerStyle} onStyleChange={setPlayerStyle} />

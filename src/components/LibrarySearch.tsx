@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { searchCatalog, type LibraryItem, type SearchTrack } from "../spotify/library";
 import { LibraryShelf } from "./LibraryShelf";
+import { AddToQueueButton } from "./Queue";
 import type { PlayerStyle } from "./StyleSwitcher";
 import { formatTime } from "../format";
 import "./LibrarySearch.css";
@@ -16,6 +17,7 @@ const MIN_QUERY = 2;
 export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySearchProps) {
   const [query, setQuery] = useState("");
   const [albums, setAlbums] = useState<LibraryItem[]>([]);
+  const [playlists, setPlaylists] = useState<LibraryItem[]>([]);
   const [tracks, setTracks] = useState<SearchTrack[]>([]);
   const [status, setStatus] = useState<"idle" | "searching" | "error">("idle");
 
@@ -24,6 +26,7 @@ export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySe
   useEffect(() => {
     if (trimmed.length < MIN_QUERY) {
       setAlbums([]);
+      setPlaylists([]);
       setTracks([]);
       setStatus("idle");
       return;
@@ -37,6 +40,7 @@ export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySe
       searchCatalog(trimmed, controller.signal)
         .then((results) => {
           setAlbums(results.albums);
+          setPlaylists(results.playlists);
           setTracks(results.tracks);
           setStatus("idle");
         })
@@ -51,7 +55,12 @@ export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySe
     };
   }, [trimmed]);
 
-  const empty = status === "idle" && trimmed.length >= MIN_QUERY && albums.length === 0 && tracks.length === 0;
+  const empty =
+    status === "idle" &&
+    trimmed.length >= MIN_QUERY &&
+    albums.length === 0 &&
+    playlists.length === 0 &&
+    tracks.length === 0;
 
   return (
     <div className="record-shop">
@@ -61,7 +70,7 @@ export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySe
           className="record-shop__input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Busca un artista, un disco o una canción"
+          placeholder="Busca un artista, un disco, una playlist o una canción"
           aria-label="Buscar en Spotify"
         />
       </div>
@@ -78,27 +87,33 @@ export function LibrarySearch({ style, onSelectAlbum, onSelectTrack }: LibrarySe
         </>
       )}
 
+      {playlists.length > 0 && (
+        <>
+          <p className="record-shop__divider">Playlists</p>
+          <LibraryShelf style={style} items={playlists} onSelect={onSelectAlbum} />
+        </>
+      )}
+
       {tracks.length > 0 && (
         <>
           <p className="record-shop__divider">Canciones</p>
           <div className="record-shop__tracks">
             {tracks.map((track) => (
-              <button
-                key={track.uri}
-                className="record-shop__track"
-                onClick={() => onSelectTrack(track.uri, track.albumUri)}
-              >
-                {track.image ? (
-                  <img className="record-shop__track-art" src={track.image} alt="" />
-                ) : (
-                  <span className="record-shop__track-art" aria-hidden="true" />
-                )}
-                <span className="record-shop__track-info">
-                  <span className="record-shop__track-name">{track.name}</span>
-                  <span className="record-shop__track-artist">{track.artists}</span>
-                </span>
-                <span className="record-shop__price">{formatTime(track.durationMs)}</span>
-              </button>
+              <div key={track.uri} className="track-row">
+                <button className="record-shop__track" onClick={() => onSelectTrack(track.uri, track.albumUri)}>
+                  {track.image ? (
+                    <img className="record-shop__track-art" src={track.image} alt="" />
+                  ) : (
+                    <span className="record-shop__track-art" aria-hidden="true" />
+                  )}
+                  <span className="record-shop__track-info">
+                    <span className="record-shop__track-name">{track.name}</span>
+                    <span className="record-shop__track-artist">{track.artists}</span>
+                  </span>
+                  <span className="record-shop__price">{formatTime(track.durationMs)}</span>
+                </button>
+                <AddToQueueButton uri={track.uri} />
+              </div>
             ))}
           </div>
         </>

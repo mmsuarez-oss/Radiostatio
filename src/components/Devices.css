@@ -1,0 +1,118 @@
+.devices {
+  flex-shrink: 0;
+}
+
+.devices__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.devices__refresh {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 6px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-faint, #707072);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.devices__refresh:hover {
+  color: var(--text, #ffffff);
+}
+
+/* Frente de aluminio cepillado del amplificador */
+.devices__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3a3a3d 0%, #26262a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.devices__note {
+  margin: 6px;
+  font-size: 12px;
+  color: #a7a7a7;
+}
+
+.devices__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: #d8d8da;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.devices__option:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.devices__option:disabled {
+  cursor: default;
+}
+
+.devices__option--active {
+  color: #ffffff;
+}
+
+/* LED apagado; encendido en verde en el que suena */
+.devices__led {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #1c2a1c;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.devices__option--active .devices__led {
+  background: #5dff7a;
+  box-shadow:
+    0 0 6px #5dff7a,
+    0 0 12px rgba(93, 255, 122, 0.5);
+}
+
+.devices__led--busy {
+  background: #ffb347;
+  animation: devices-blink 0.5s steps(2) infinite;
+}
+
+@keyframes devices-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+.devices__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.devices__type {
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a8a8c;
+}

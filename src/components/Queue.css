@@ -1,0 +1,124 @@
+.queue {
+  flex-shrink: 0;
+}
+
+/* Tapa interior del casete (la J-card): cartulina con renglones */
+.queue__card {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 41px, rgba(40, 60, 110, 0.14) 41px 42px),
+    #ecebe4;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  color: #1f2533;
+  scrollbar-width: thin;
+}
+
+.queue__note {
+  margin: 4px 0;
+  font-family: "Permanent Marker", cursive;
+  font-size: 13px;
+  color: rgba(31, 37, 51, 0.6);
+}
+
+.queue__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: queue;
+}
+
+.queue__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  counter-increment: queue;
+}
+
+.queue__item::before {
+  content: counter(queue);
+  width: 14px;
+  flex-shrink: 0;
+  font-family: "Permanent Marker", cursive;
+  font-size: 12px;
+  color: rgba(31, 37, 51, 0.55);
+}
+
+.queue__art {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  object-fit: cover;
+  background: rgba(31, 37, 51, 0.12);
+}
+
+.queue__info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.queue__name,
+.queue__artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue__name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.queue__artist {
+  font-size: 11px;
+  color: rgba(31, 37, 51, 0.65);
+}
+
+/* El + de cada fila de canciones */
+.track-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.track-row > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-to-queue {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--border, rgba(255, 255, 255, 0.08));
+  color: var(--text-muted, #a7a7a7);
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.add-to-queue:hover {
+  color: var(--text, #ffffff);
+  box-shadow: inset 0 0 0 1px var(--accent, #e3b765);
+}
+
+.add-to-queue--done {
+  background: var(--accent, #e3b765);
+  color: #1a1308;
+}
+
+.add-to-queue--error {
+  background: rgba(194, 54, 42, 0.8);
+  color: #fff;
+}

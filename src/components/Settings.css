@@ -52,8 +52,38 @@
 }
 
 /* El último grupo no necesita separación, el panel ya tiene padding */
-.settings__swatches:not(:last-child) {
+.settings__swatches:not(:last-child),
+.settings__choices:not(:last-child) {
   margin-bottom: 14px;
+}
+
+.settings__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  /* Que los botones no estiren el panel más que la fila de colores */
+  max-width: 179px;
+}
+
+.settings__choice {
+  padding: 5px 9px;
+  border: none;
+  border-radius: 14px;
+  background: var(--surface-2, #232325);
+  color: var(--text-muted, #a7a7a7);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settings__choice:hover {
+  color: var(--text, #ffffff);
+}
+
+.settings__choice--active {
+  background: var(--accent, #e3b765);
+  color: #1a1308;
 }
 
 .settings__swatch {

@@ -23,3 +23,9 @@ export const BODIES: Swatch[] = [
   { value: "#b08a4a", label: "Mostaza" },
   { value: "#5b3f9e", label: "Violeta" },
 ];
+
+/** Estilo de toda la página alrededor del aparato (compu.css). */
+export const SKINS: Swatch[] = [
+  { value: "analogico", label: "Analógico" },
+  { value: "compu", label: "Compu 2000" },
+];

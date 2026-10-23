@@ -1,0 +1,230 @@
+.lyrics {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.lyrics__window {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* La hoja de papel que venía en el sobre del disco */
+.lyrics__sheet {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 20px;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 27px, rgba(58, 45, 23, 0.08) 27px 28px),
+    linear-gradient(170deg, #f4ecdb 0%, #e9dcc0 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
+    inset 0 0 24px rgba(120, 90, 40, 0.18),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+  color: #3a2d17;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(58, 45, 23, 0.35) transparent;
+}
+
+/* Lugar de sobra abajo para que hasta la última línea suba al centro. Va como
+   contenido y no como padding: un padding de 40vh obligaba a la hoja a medir eso
+   como mínimo y en pantallas bajas tapaba lo que viene abajo. */
+.lyrics__sheet::after {
+  content: "";
+  display: block;
+  height: 40vh;
+}
+
+.lyrics__line {
+  margin: 0;
+  padding: 4px 0;
+  font-size: 15px;
+  line-height: 1.45;
+  color: rgba(58, 45, 23, 0.55);
+  transition: color 0.25s ease;
+}
+
+.lyrics__line--past {
+  color: rgba(58, 45, 23, 0.35);
+}
+
+/* Resaltador sobre la línea que suena: en el span, así marca solo el texto y no todo el renglón */
+.lyrics__line--current {
+  color: #1d160b;
+  font-weight: 700;
+}
+
+.lyrics__line--current span {
+  background: linear-gradient(
+    180deg,
+    transparent 18%,
+    color-mix(in srgb, var(--accent, #e3b765) 70%, transparent) 18%,
+    color-mix(in srgb, var(--accent, #e3b765) 70%, transparent) 88%,
+    transparent 88%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.lyrics__plain {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Cada línea por separado, para poder elegirlas; las vacías mantienen el espacio */
+.lyrics__plain-line {
+  margin: 0;
+  min-height: 1.7em;
+}
+
+/* Compartir: la barra arriba de la hoja */
+.lyrics__share-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.lyrics__share-hint {
+  margin-right: auto;
+  font-size: 11px;
+  color: var(--text-muted, #a7a7a7);
+}
+
+.lyrics__share-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 14px;
+  background: var(--surface-2, #232325);
+  color: var(--text-muted, #a7a7a7);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.lyrics__share-button:hover {
+  color: var(--text, #ffffff);
+}
+
+.lyrics__share-button--main {
+  background: var(--accent, #e3b765);
+  color: #1a1308;
+}
+
+.lyrics__share-button--main:hover {
+  color: #1a1308;
+}
+
+.lyrics__share-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Mientras se eligen líneas, el resaltador marca las elegidas y no la que suena */
+.lyrics--selecting [role="button"] {
+  cursor: pointer;
+}
+
+.lyrics--selecting .lyrics__line--current {
+  font-weight: 400;
+  color: rgba(58, 45, 23, 0.55);
+}
+
+.lyrics--selecting .lyrics__line--current span {
+  background: none;
+}
+
+.lyrics--selecting .lyrics__line--picked {
+  font-weight: 700;
+  color: #1d160b;
+}
+
+.lyrics--selecting .lyrics__line--picked span {
+  background: linear-gradient(
+    180deg,
+    transparent 18%,
+    color-mix(in srgb, var(--accent, #e3b765) 70%, transparent) 18%,
+    color-mix(in srgb, var(--accent, #e3b765) 70%, transparent) 88%,
+    transparent 88%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.lyrics--selecting [role="button"]:focus-visible {
+  outline: 2px solid var(--accent, #e3b765);
+  outline-offset: 2px;
+}
+
+/* La tarjeta lista, antes de mandarla */
+.share-card {
+  width: min(92vw, 380px);
+  max-height: 94vh;
+  box-sizing: border-box;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: var(--surface, #161618);
+  color: var(--text, #ffffff);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.share-card::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.share-card__image {
+  display: block;
+  width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.share-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* En el celular la letra va plegada arriba de la biblioteca */
+.lyrics-fold .lyrics {
+  padding: 0 10px 10px;
+}
+
+.lyrics-fold .rack__label {
+  display: none;
+}
+
+.lyrics-fold .lyrics__sheet {
+  flex: none;
+  height: 320px;
+}
+
+.lyrics__note {
+  margin: 0;
+  font-family: "Permanent Marker", cursive;
+  font-size: 15px;
+  color: rgba(58, 45, 23, 0.6);
+  transform: rotate(-1deg);
+}
+
+.lyrics__note a {
+  color: inherit;
+}
+
+.lyrics__footnote {
+  margin: 6px 2px 0;
+  font-size: 11px;
+  color: var(--text-faint, #707072);
+}

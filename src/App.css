@@ -7,6 +7,8 @@
   --text-faint: #707072;
   --accent: #e3b765;
 
+  /* El relleno va dentro del alto: si no, la página siempre scrolleaba 48px de más */
+  box-sizing: border-box;
   min-height: 100vh;
   display: flex;
   align-items: center;

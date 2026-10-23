@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPlayer, type NowPlaying } from "../spotify/player";
 import { createDemoPlayer } from "../spotify/demoPlayer";
 import { setSfxVolume } from "../sfx";
@@ -10,9 +10,27 @@ import { Cassette } from "./Cassette";
 import { VolumeSlider } from "./VolumeSlider";
 import { StyleSwitcher, type PlayerStyle } from "./StyleSwitcher";
 import { LibraryPanel } from "./LibraryPanel";
+import { Lyrics, type LyricsProps } from "./Lyrics";
+import { Queue } from "./Queue";
+import { Devices } from "./Devices";
+import { VuMeters } from "./VuMeters";
+import { Taskbar, TitleBar } from "./Compu";
 import "./Player.css";
 
 const VOLUME_STEP = 0.1;
+
+// Desde este ancho el aparato se arma como rack: biblioteca, aparato y letras lado a lado.
+const WIDE_QUERY = window.matchMedia("(min-width: 1100px)");
+
+function useWide() {
+  return useSyncExternalStore(
+    (onChange) => {
+      WIDE_QUERY.addEventListener("change", onChange);
+      return () => WIDE_QUERY.removeEventListener("change", onChange);
+    },
+    () => WIDE_QUERY.matches,
+  );
+}
 
 const HINTS: Record<PlayerStyle, string> = {
   wheel: "Gira para cambiar de canción",
@@ -31,13 +49,16 @@ interface PlayerProps {
 export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
   const [track, setTrack] = useState<NowPlaying | null>(null);
   const [volume, setVolume] = useState(0.6);
+  const [lyricsOpen, setLyricsOpen] = useState(false);
   const [progressMs, setProgressMs] = useState(0);
   const [spinTrigger, setSpinTrigger] = useState(0);
+  const [playerError, setPlayerError] = useState("");
   const controlsRef = useRef<Awaited<ReturnType<typeof createPlayer>> | null>(null);
   const trackRef = useRef<NowPlaying | null>(null);
   const anchorRef = useRef({ position: 0, timestamp: Date.now() });
   const pendingAnimRef = useRef<PlayerStyle | null>(null);
   const selectingRef = useRef(false);
+  const wide = useWide();
 
   useEffect(() => {
     let cancelled = false;
@@ -54,13 +75,27 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
         if (pendingAnimRef.current === "turntable") setSpinTrigger((s) => s + 1);
         pendingAnimRef.current = null;
       }
+    }, (message) => {
+      if (!cancelled) setPlayerError(message);
     }).then((controls) => {
-      if (!cancelled) controlsRef.current = controls;
+      // Un reproductor que nadie usa sigue conectado a Spotify como dispositivo
+      // fantasma y puede quedarse con la música: se desconecta.
+      if (cancelled) controls.disconnect();
+      else controlsRef.current = controls;
     });
     return () => {
       cancelled = true;
+      controlsRef.current?.disconnect();
+      controlsRef.current = null;
     };
   }, [demo]);
+
+  // El aviso de error se va solo: si la siguiente canción suena, ya no aplica.
+  useEffect(() => {
+    if (!playerError) return;
+    const timer = setTimeout(() => setPlayerError(""), 10_000);
+    return () => clearTimeout(timer);
+  }, [playerError]);
 
   useEffect(() => {
     trackRef.current = track;
@@ -157,9 +192,49 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
   const isPaused = track?.isPaused ?? true;
   const shuffle = track?.shuffle ?? false;
 
-  return (
+  const lyricsProps: LyricsProps = {
+    trackUri: track?.trackUri ?? "",
+    trackName: track?.name ?? "",
+    artists: track?.artists ?? "",
+    albumArt: track?.albumArt ?? "",
+    durationMs: track?.duration ?? 0,
+    progressMs,
+  };
+
+  // La biblioteca pide cuenta: en el demo no va
+  const library = !demo && (
+    <LibraryPanel
+      style={style}
+      albumUri={track?.albumUri ?? ""}
+      albumName={track?.albumName ?? ""}
+      currentTrackUri={track?.trackUri ?? ""}
+      onSelectAlbum={playAlbum}
+      onSelectTrack={playTrack}
+      alwaysOpen={wide}
+    />
+  );
+
+  const deck = (
     <div className="player">
+      <TitleBar title="Radiostatio" />
       <StyleSwitcher style={style} onChange={onStyleChange} />
+
+      {/* Si la música está en otro aparato, que no parezca que suena acá. */}
+      {track?.playingOn && (
+        <div className="player__elsewhere">
+          <span className="player__elsewhere-text">
+            Sonando en <strong>{track.playingOn}</strong>
+          </span>
+          <button className="player__elsewhere-button" onClick={() => controlsRef.current?.playHere()}>
+            Escuchar acá
+          </button>
+        </div>
+      )}
+      {playerError && (
+        <p className="player__error" role="alert">
+          {playerError}
+        </p>
+      )}
 
       {style === "turntable" && (
         <div className="player__info">
@@ -257,17 +332,57 @@ export function Player({ style, onStyleChange, demo = false }: PlayerProps) {
 
       <VolumeSlider value={volume} onChange={applyVolume} />
 
-      {/* La biblioteca pide cuenta: en el demo no va */}
-      {!demo && (
-        <LibraryPanel
-          style={style}
-          albumUri={track?.albumUri ?? ""}
-          albumName={track?.albumName ?? ""}
-          currentTrackUri={track?.trackUri ?? ""}
-          onSelectAlbum={playAlbum}
-          onSelectTrack={playTrack}
-        />
+      {/* En el celular la letra va plegada; solo se pide a LRCLIB cuando se abre. */}
+      {!wide && !demo && (
+        <details className="library-panel lyrics-fold" onToggle={(e) => setLyricsOpen(e.currentTarget.open)}>
+          <summary className="library-panel__summary">
+            <span className="library-panel__summary-text">Letra</span>
+            <span className="library-panel__chevron" aria-hidden="true" />
+          </summary>
+          {lyricsOpen && <Lyrics {...lyricsProps} />}
+        </details>
       )}
+
+      {!wide && library}
+    </div>
+  );
+
+  const taskbar = <Taskbar trackName={track?.name ?? ""} />;
+
+  if (!wide) {
+    return (
+      <>
+        {deck}
+        {taskbar}
+      </>
+    );
+  }
+
+  return (
+    <div className="rack">
+      {taskbar}
+      <aside className="rack__side">
+        {library || (
+          <p className="rack__demo-note">Con tu cuenta de Spotify, acá va tu biblioteca: discos, playlists y Tus me gusta.</p>
+        )}
+      </aside>
+
+      <div className="rack__center">
+        {deck}
+        <VuMeters playing={!!track && !isPaused} />
+      </div>
+
+      <aside className="rack__side rack__side--right">
+        {demo ? (
+          <p className="rack__demo-note">Con tu cuenta, acá van la letra de lo que suena, lo que sigue y a qué parlante mandarlo.</p>
+        ) : (
+          <>
+            <Lyrics {...lyricsProps} />
+            <Queue trackUri={track?.trackUri ?? ""} />
+            <Devices trackUri={track?.trackUri ?? ""} />
+          </>
+        )}
+      </aside>
     </div>
   );
 }

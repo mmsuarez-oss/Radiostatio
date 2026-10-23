@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ACCENTS, BODIES, type Swatch } from "../palettes";
+import { ACCENTS, BODIES, SKINS, type Swatch } from "../palettes";
 import "./Settings.css";
 
 interface SettingsProps {
@@ -9,6 +9,10 @@ interface SettingsProps {
   onAccentChange: (color: string) => void;
   body: string;
   onBodyChange: (color: string) => void;
+  skin: string;
+  onSkinChange: (skin: string) => void;
+  /** Solo llega con la sesión abierta. */
+  onLogout?: () => void;
 }
 
 interface SwatchesProps {
@@ -35,14 +39,42 @@ function Swatches({ options, current, onPick }: SwatchesProps) {
   );
 }
 
-export function Settings({ theme, onThemeChange, accent, onAccentChange, body, onBodyChange }: SettingsProps) {
+/** Como las muestras de color, pero con nombre: para elegir el estilo de la página. */
+function Choices({ options, current, onPick }: SwatchesProps) {
+  return (
+    <div className="settings__choices">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          className={`settings__choice ${option.value === current ? "settings__choice--active" : ""}`}
+          onClick={() => onPick(option.value)}
+          aria-pressed={option.value === current}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function Settings({
+  theme,
+  onThemeChange,
+  accent,
+  onAccentChange,
+  body,
+  onBodyChange,
+  skin,
+  onSkinChange,
+  onLogout,
+}: SettingsProps) {
   const [open, setOpen] = useState(false);
   const next = theme === "dark" ? "light" : "dark";
 
   return (
     <div className="settings">
       <button
-        className="settings__button"
+        className="settings__button settings__theme"
         onClick={() => onThemeChange(next)}
         aria-label={next === "dark" ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
       >
@@ -60,11 +92,23 @@ export function Settings({ theme, onThemeChange, accent, onAccentChange, body, o
         )}
       </button>
 
+      {/* Va antes de la pintura: así no salta de lugar cuando se abre el panel de colores. */}
+      {onLogout && (
+        <button className="settings__button" onClick={onLogout} aria-label="Cerrar sesión" title="Cerrar sesión">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path
+              fill="currentColor"
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+            />
+          </svg>
+        </button>
+      )}
+
       <button
         className={`settings__button ${open ? "settings__button--active" : ""}`}
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        aria-label="Colores"
+        aria-label="Colores y estilos"
       >
         <svg viewBox="0 0 24 24" width="18" height="18">
           <path
@@ -80,6 +124,8 @@ export function Settings({ theme, onThemeChange, accent, onAccentChange, body, o
           <Swatches options={ACCENTS} current={accent} onPick={onAccentChange} />
           <p className="settings__label">Carcasa</p>
           <Swatches options={BODIES} current={body} onPick={onBodyChange} />
+          <p className="settings__label">Estilo</p>
+          <Choices options={SKINS} current={skin} onPick={onSkinChange} />
         </div>
       )}
     </div>

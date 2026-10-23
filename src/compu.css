@@ -1,0 +1,955 @@
+/* Estilo Compu 2000 (panel de pintura → Estilo): toda la página como el escritorio
+   de las compus de los 2000. Ventanas grises con relieve, barra de título azul y la
+   barra de tareas abajo. Los aparatos (rueda, tornamesa, CD, casete) no se tocan.
+   La barra de título y lo seleccionado toman el color de la carcasa, como los
+   esquemas de color de aquellas ventanas. Todo el estilo vive en este archivo. */
+
+/* Piezas que solo existen en este estilo */
+.win-titlebar,
+.taskbar,
+.volume__legend,
+.volume__mute,
+.lyrics__menubar,
+.lyrics__toolbar,
+.lyrics__ruler,
+.lyrics__statusbar {
+  display: none;
+}
+
+/* ---------- Escritorio ---------- */
+
+.app[data-skin="compu"] {
+  --win-face: #d4d0c8;
+  --win-select: color-mix(in srgb, var(--body, #1f5aa8) 75%, #000);
+  --win-title: linear-gradient(90deg, var(--win-select), color-mix(in srgb, var(--body, #1f5aa8) 35%, #fff));
+  --win-raised: inset -1px -1px 0 #404040, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080, inset 2px 2px 0 #e8e6e0;
+  --win-button: inset -1px -1px 0 #404040, inset 1px 1px 0 #ffffff, inset -2px -2px 0 #808080;
+  --win-pressed: inset 1px 1px 0 #404040, inset -1px -1px 0 #ffffff, inset 2px 2px 0 #808080;
+  --win-sunken: inset 1px 1px 0 #808080, inset 2px 2px 0 #404040, inset -1px -1px 0 #ffffff;
+  --win-font: Tahoma, Verdana, "Segoe UI", sans-serif;
+
+  /* Las variables de siempre en gris de ventana: lo que no tiene regla propia igual combina */
+  --surface: #d4d0c8;
+  --surface-2: #ffffff;
+  --border: rgba(0, 0, 0, 0.3);
+  --text: #000000;
+  --text-muted: #404040;
+  --text-faint: #606060;
+
+  /* Lugar para la barra de tareas */
+  padding-bottom: calc(max(24px, env(safe-area-inset-bottom)) + 30px);
+  background: #3a6ea5;
+  font-family: var(--win-font);
+}
+
+/* ---------- Barra de título ---------- */
+
+[data-skin="compu"] .win-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 20px;
+  padding: 0 3px 0 5px;
+  background: var(--win-title);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.win-titlebar__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.win-titlebar__buttons {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.win-titlebar__buttons span {
+  width: 16px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--win-face);
+  box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 #fff;
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---------- Barra de tareas ---------- */
+
+[data-skin="compu"] .taskbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 max(2px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(2px, env(safe-area-inset-left));
+  background: var(--win-face);
+  box-shadow: inset 0 1px 0 #e8e6e0, inset 0 2px 0 #fff;
+  color: #000;
+  font-size: 11px;
+}
+
+.taskbar__start,
+.taskbar__task {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  box-shadow: var(--win-button);
+}
+
+.taskbar__start {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* El logo de cuatro colores de Inicio, hecho con cuatro cuadritos */
+.taskbar__start::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  background:
+    linear-gradient(#e0412b, #e0412b) 0 0 / 5px 5px no-repeat,
+    linear-gradient(#3fa142, #3fa142) 7px 0 / 5px 5px no-repeat,
+    linear-gradient(#2b63d6, #2b63d6) 0 7px / 5px 5px no-repeat,
+    linear-gradient(#f2c12e, #f2c12e) 7px 7px / 5px 5px no-repeat;
+}
+
+/* La ventana abierta: hundida, porque es la que está al frente */
+.taskbar__task {
+  min-width: 0;
+  max-width: 240px;
+  flex: 1;
+  background: #e8e6e0;
+  box-shadow: var(--win-pressed);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taskbar__tray {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 3px 10px;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff;
+}
+
+/* ---------- Ventanas en general ---------- */
+
+[data-skin="compu"] .player,
+[data-skin="compu"] .queue,
+[data-skin="compu"] .devices,
+[data-skin="compu"] .vu,
+[data-skin="compu"] .login-screen {
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-raised), 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Botones grises con relieve, que se hunden al apretarlos */
+[data-skin="compu"] .player__shuffle,
+[data-skin="compu"] .player__elsewhere-button,
+[data-skin="compu"] .settings__button,
+[data-skin="compu"] .settings__choice,
+[data-skin="compu"] .library-shelf__kind,
+[data-skin="compu"] .library-shelf__reconnect,
+[data-skin="compu"] .devices__refresh,
+[data-skin="compu"] .lyrics__share-button,
+[data-skin="compu"] .login-button,
+[data-skin="compu"] .login-demo,
+[data-skin="compu"] .demo-bar button {
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-button);
+  color: #000;
+  font-weight: 400;
+}
+
+[data-skin="compu"] .player__shuffle:active,
+[data-skin="compu"] .player__elsewhere-button:active,
+[data-skin="compu"] .settings__button:active,
+[data-skin="compu"] .settings__choice:active,
+[data-skin="compu"] .library-shelf__kind:active,
+[data-skin="compu"] .devices__refresh:active,
+[data-skin="compu"] .lyrics__share-button:active,
+[data-skin="compu"] .login-button:active,
+[data-skin="compu"] .login-demo:active,
+[data-skin="compu"] .demo-bar button:active {
+  box-shadow: var(--win-pressed);
+}
+
+/* Lo que está prendido queda hundido, como un botón que se trabó apretado */
+[data-skin="compu"] .player__shuffle--on,
+[data-skin="compu"] .settings__button--active,
+[data-skin="compu"] .settings__choice--active,
+[data-skin="compu"] .library-shelf__kind--active {
+  background: #e8e6e0;
+  box-shadow: var(--win-pressed);
+  color: #000;
+  font-weight: 700;
+}
+
+/* Campos de texto: blancos y hundidos */
+[data-skin="compu"] .library-shelf__search,
+[data-skin="compu"] .record-shop__input,
+[data-skin="compu"] .login-input {
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+  color: #000;
+  font-family: inherit;
+}
+
+[data-skin="compu"] .library-shelf__search:focus,
+[data-skin="compu"] .record-shop__input:focus {
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
+
+/* ---------- Ajustes (arriba a la derecha) ---------- */
+
+[data-skin="compu"] .settings__button {
+  width: 32px;
+  height: 32px;
+}
+
+/* El modo oscuro no aplica: las ventanas de entonces eran grises y punto */
+[data-skin="compu"] .settings__theme {
+  display: none;
+}
+
+[data-skin="compu"] .settings__panel {
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-raised), 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+[data-skin="compu"] .settings__label {
+  color: #000;
+  letter-spacing: 0;
+}
+
+[data-skin="compu"] .settings__swatch {
+  border-radius: 0;
+  box-shadow: var(--win-sunken);
+}
+
+[data-skin="compu"] .settings__swatch--active {
+  box-shadow: var(--win-sunken), 0 0 0 2px var(--win-face), 0 0 0 3px #000;
+}
+
+/* ---------- El aparato ---------- */
+
+[data-skin="compu"] .player {
+  padding: 3px 12px 14px;
+}
+
+/* La barra de título va de borde a borde de la ventana */
+[data-skin="compu"] .player > .win-titlebar {
+  align-self: stretch;
+  margin: 0 -9px;
+}
+
+/* Las pestañas de las ventanas de propiedades */
+[data-skin="compu"] .style-switcher {
+  gap: 2px;
+  padding: 2px 0 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: inset 0 -1px 0 #fff;
+}
+
+[data-skin="compu"] .style-switcher__option {
+  border-radius: 3px 3px 0 0;
+  background: var(--win-face);
+  box-shadow: inset 1px 1px 0 #fff, inset -1px 0 0 #404040, inset -2px 0 0 #808080;
+  color: #000;
+}
+
+[data-skin="compu"] .style-switcher__option--active {
+  font-weight: 700;
+  transform: translateY(-2px);
+}
+
+[data-skin="compu"] .player__artist,
+[data-skin="compu"] .player__hint {
+  color: #404040;
+}
+
+/* La barra de progreso de bloquecitos, como al copiar archivos */
+[data-skin="compu"] .player__progress-track {
+  box-sizing: border-box;
+  height: 16px;
+  padding: 2px;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+}
+
+[data-skin="compu"] .player__progress-fill {
+  border-radius: 0;
+  background: repeating-linear-gradient(90deg, var(--win-select) 0 8px, transparent 8px 10px);
+}
+
+[data-skin="compu"] .player__progress-labels {
+  color: #000;
+}
+
+/* Avisos como el globito amarillo de la barra de tareas */
+[data-skin="compu"] .player__elsewhere,
+[data-skin="compu"] .player__error,
+[data-skin="compu"] .demo-bar {
+  border-radius: 0;
+  background: #ffffe1;
+  box-shadow: 0 0 0 1px #000;
+  color: #000;
+}
+
+[data-skin="compu"] .player__elsewhere-text strong {
+  color: #000;
+}
+
+[data-skin="compu"] .player__error {
+  color: #a00000;
+}
+
+/* El volumen en su recuadro con título, como los grupos de opciones de esas ventanas:
+   línea grabada (gris oscura con su brillo blanco) y el título cortando el borde. */
+[data-skin="compu"] .volume {
+  position: relative;
+  box-sizing: border-box;
+  max-width: 260px;
+  padding: 14px 10px 8px;
+  border: 1px solid #808080;
+  box-shadow: 1px 1px 0 #fff, inset 1px 1px 0 #fff;
+}
+
+[data-skin="compu"] .volume__legend {
+  display: block;
+  position: absolute;
+  top: -7px;
+  left: 8px;
+  padding: 0 3px;
+  background: var(--win-face);
+  color: #000;
+  font-size: 11px;
+}
+
+[data-skin="compu"] .volume__mute {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: 8px;
+  color: #000;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+/* La casilla blanca hundida, con su tilde negra */
+[data-skin="compu"] .volume__mute input {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+  cursor: pointer;
+}
+
+[data-skin="compu"] .volume__mute input:checked {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 13'%3E%3Cpath d='M3 6l2 2 5-5v2l-5 5-2-2z' fill='%23000'/%3E%3C/svg%3E")
+      center / 13px 13px no-repeat,
+    #fff;
+}
+
+[data-skin="compu"] .volume__mute input:focus-visible {
+  outline: 1px dotted #000;
+  outline-offset: 2px;
+}
+
+/* El volumen como un control deslizante: canaleta hundida y una perilla gris */
+[data-skin="compu"] .volume__track::before {
+  height: 2px;
+  border-radius: 0;
+  background: #808080;
+  box-shadow: 0 1px 0 #fff, 0 -1px 0 #404040;
+}
+
+[data-skin="compu"] .volume__fill,
+[data-skin="compu"] .volume__track:hover .volume__fill,
+[data-skin="compu"] .volume__track--dragging .volume__fill {
+  background: transparent;
+}
+
+[data-skin="compu"] .volume__thumb {
+  width: 10px;
+  height: 18px;
+  margin-left: -5px;
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-button);
+  opacity: 1;
+}
+
+[data-skin="compu"] .volume__icon {
+  color: #000;
+}
+
+/* ---------- Rack de la compu ---------- */
+
+/* Los nombres van en la barra de título de cada ventana */
+[data-skin="compu"] .rack__label {
+  display: none;
+}
+
+[data-skin="compu"] .rack {
+  height: calc(100vh - 48px - 30px);
+}
+
+[data-skin="compu"] .rack__demo-note {
+  color: #fff;
+}
+
+/* Sin vúmetros en este estilo: el aparato queda solo al centro y puede usar todo el alto */
+[data-skin="compu"] .vu {
+  display: none;
+}
+
+[data-skin="compu"] .rack__center .player {
+  max-height: calc(100vh - 48px - 30px);
+}
+
+/* ---------- Letra: el documento abierto en el procesador de texto ---------- */
+
+[data-skin="compu"] .lyrics__window {
+  padding: 3px;
+  background: var(--win-face);
+  box-shadow: var(--win-raised), 0 6px 16px rgba(0, 0, 0, 0.35);
+  color: #000;
+  font-size: 11px;
+}
+
+[data-skin="compu"] .lyrics__menubar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 10px;
+  padding: 3px 4px;
+}
+
+/* La letra subrayada era el atajo con Alt */
+.lyrics__menubar span {
+  display: inline-block;
+}
+
+.lyrics__menubar span::first-letter {
+  text-decoration: underline;
+}
+
+[data-skin="compu"] .lyrics__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  border-top: 1px solid #808080;
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+.lyrics__combo {
+  position: relative;
+  min-width: 48px;
+  padding: 1px 18px 1px 3px;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+}
+
+.lyrics__combo--small {
+  min-width: 14px;
+}
+
+.lyrics__combo::after {
+  content: "▾";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  bottom: 2px;
+  width: 13px;
+  display: grid;
+  place-items: center;
+  background: var(--win-face);
+  box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 #fff;
+  font-size: 9px;
+}
+
+.lyrics__toolbar b,
+.lyrics__toolbar i,
+.lyrics__toolbar u {
+  width: 16px;
+  text-align: center;
+  font-size: 12px;
+}
+
+[data-skin="compu"] .lyrics__ruler {
+  display: flex;
+  justify-content: space-around;
+  height: 14px;
+  margin: 2px 0;
+  padding-left: 12px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 7px, #808080 7px 8px) bottom / 100% 3px no-repeat,
+    #fff;
+  box-shadow: inset 1px 1px 0 #808080;
+  font-size: 9px;
+  line-height: 12px;
+}
+
+[data-skin="compu"] .lyrics__sheet {
+  border-radius: 0;
+  padding: 14px 18px 14px 22px;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+  color: #000;
+  font-family: inherit;
+  scrollbar-color: var(--win-face) #ecebe8;
+}
+
+[data-skin="compu"] .lyrics__line {
+  padding: 1px 0;
+  font-size: 13px;
+  color: #000;
+}
+
+/* La línea que suena queda seleccionada, como texto marcado con el mouse */
+[data-skin="compu"] .lyrics__line--current {
+  font-weight: 400;
+  color: #fff;
+}
+
+[data-skin="compu"] .lyrics__line--current span {
+  background: var(--win-select);
+}
+
+/* El cursor de texto titilando al final de lo seleccionado */
+[data-skin="compu"] .lyrics__line--current span::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: #000;
+  animation: compu-caret 1.06s steps(1) infinite;
+}
+
+@keyframes compu-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-skin="compu"] .lyrics__line--current span::after {
+    animation: none;
+  }
+}
+
+[data-skin="compu"] .lyrics__plain,
+[data-skin="compu"] .lyrics__note {
+  font-family: inherit;
+  font-size: 13px;
+  color: #000;
+  transform: none;
+}
+
+[data-skin="compu"] .lyrics__footnote {
+  color: #fff;
+}
+
+/* Compartir: una barra de herramientas más, con botones grises */
+[data-skin="compu"] .lyrics__share-bar {
+  margin: 0;
+  padding: 3px 4px;
+  border-top: 1px solid #808080;
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+[data-skin="compu"] .lyrics__share-hint {
+  color: #000;
+}
+
+[data-skin="compu"] .lyrics__share-button--main {
+  font-weight: 700;
+}
+
+/* Mientras se eligen líneas, las elegidas quedan seleccionadas y la que suena no */
+[data-skin="compu"] .lyrics--selecting .lyrics__line--current {
+  color: #000;
+}
+
+[data-skin="compu"] .lyrics--selecting .lyrics__line--current span {
+  background: none;
+}
+
+[data-skin="compu"] .lyrics--selecting .lyrics__line--current span::after {
+  display: none;
+}
+
+[data-skin="compu"] .lyrics--selecting .lyrics__line--picked {
+  font-weight: 400;
+  color: #fff;
+}
+
+[data-skin="compu"] .lyrics--selecting .lyrics__line--picked span {
+  background: var(--win-select);
+}
+
+[data-skin="compu"] .lyrics--selecting [role="button"]:focus-visible {
+  outline: 1px dotted #000;
+}
+
+/* La tarjeta lista, en su ventana */
+[data-skin="compu"] .share-card {
+  padding: 3px;
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-raised), 4px 4px 0 rgba(0, 0, 0, 0.4);
+  color: #000;
+}
+
+[data-skin="compu"] .share-card__image {
+  width: calc(100% - 20px);
+  margin: 10px auto 0;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px #808080, 1px 1px 0 1px #fff;
+}
+
+[data-skin="compu"] .share-card__actions {
+  padding: 0 10px 10px;
+}
+
+/* En el celular la letra es otra ventana, como la biblioteca */
+[data-skin="compu"] .lyrics-fold .lyrics {
+  padding: 6px;
+}
+
+[data-skin="compu"] .lyrics__statusbar {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+[data-skin="compu"] .lyrics__statusbar span {
+  padding: 1px 6px;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff;
+}
+
+/* Las teclas apagadas: texto gris con su sombrita blanca */
+.lyrics__status-off {
+  color: #808080;
+  text-shadow: 1px 1px 0 #fff;
+}
+
+/* ---------- Biblioteca ---------- */
+
+[data-skin="compu"] .library-panel {
+  padding: 3px;
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-raised);
+  color: #000;
+}
+
+[data-skin="compu"] .library-panel__summary {
+  padding: 6px;
+  background: var(--win-title);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+[data-skin="compu"] .library-panel__chevron {
+  border-color: #fff;
+}
+
+[data-skin="compu"] .library-panel__tabs {
+  gap: 2px;
+  padding: 8px 6px 0;
+}
+
+[data-skin="compu"] .library-panel__tab {
+  padding: 6px 8px;
+  border-radius: 3px 3px 0 0;
+  background: var(--win-face);
+  box-shadow: inset 1px 1px 0 #fff, inset -1px 0 0 #404040, inset -2px 0 0 #808080;
+  color: #000;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+[data-skin="compu"] .library-panel__tab--active {
+  font-weight: 700;
+  transform: translateY(-2px);
+}
+
+/* La lista de canciones: blanca, hundida, y la que suena seleccionada */
+[data-skin="compu"] .library-panel__tracks {
+  margin: 0 6px 6px;
+  padding: 2px;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+}
+
+[data-skin="compu"] .library-panel__album {
+  margin: 0 0 2px;
+  padding: 2px 6px;
+  background: var(--win-face);
+  box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 #fff;
+  color: #000;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+[data-skin="compu"] .library-panel__empty {
+  padding: 6px;
+  color: #404040;
+}
+
+[data-skin="compu"] .library-panel__track {
+  padding: 4px 6px;
+  border-radius: 0;
+  color: #000;
+}
+
+/* Al pasar por arriba, el rectángulo punteado de foco */
+[data-skin="compu"] .library-panel__track:hover {
+  background: none;
+  outline: 1px dotted #000;
+  outline-offset: -2px;
+}
+
+[data-skin="compu"] .library-panel__track--current,
+[data-skin="compu"] .library-panel__track--current:hover {
+  background: var(--win-select);
+}
+
+[data-skin="compu"] .library-panel__track-num,
+[data-skin="compu"] .library-panel__track-artist,
+[data-skin="compu"] .library-panel__track-time {
+  color: #404040;
+}
+
+[data-skin="compu"] .library-panel__track--current .library-panel__track-name,
+[data-skin="compu"] .library-panel__track--current .library-panel__track-num,
+[data-skin="compu"] .library-panel__track--current .library-panel__track-artist,
+[data-skin="compu"] .library-panel__track--current .library-panel__track-time {
+  color: #fff;
+}
+
+/* Los + de cada canción, botoncitos con relieve */
+[data-skin="compu"] .add-to-queue {
+  width: 24px;
+  height: 22px;
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-button);
+  color: #000;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+[data-skin="compu"] .add-to-queue:active {
+  box-shadow: var(--win-pressed);
+}
+
+[data-skin="compu"] .add-to-queue--done {
+  background: var(--win-select);
+  color: #fff;
+}
+
+/* La disquería de la búsqueda, sin madera ni cartón */
+[data-skin="compu"] .record-shop__counter {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+[data-skin="compu"] .record-shop__welcome,
+[data-skin="compu"] .record-shop__note {
+  font-family: inherit;
+  font-size: 12px;
+  color: #000;
+  transform: none;
+}
+
+[data-skin="compu"] .record-shop__divider {
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-button);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: #000;
+  transform: none;
+}
+
+[data-skin="compu"] .record-shop__track {
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+  color: #000;
+}
+
+[data-skin="compu"] .record-shop__track:hover {
+  transform: none;
+  background: var(--win-select);
+  box-shadow: none;
+  color: #fff;
+}
+
+[data-skin="compu"] .record-shop__track:hover .record-shop__track-artist {
+  color: #fff;
+}
+
+[data-skin="compu"] .record-shop__price {
+  border-radius: 0;
+  background: var(--win-face);
+  box-shadow: var(--win-button);
+  font-family: inherit;
+  color: #000;
+  transform: none;
+}
+
+/* ---------- Sigue ---------- */
+
+[data-skin="compu"] .queue {
+  padding: 3px;
+}
+
+[data-skin="compu"] .queue__card {
+  margin-top: 3px;
+  padding: 2px 6px;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+  color: #000;
+  scrollbar-color: var(--win-face) #ecebe8;
+}
+
+[data-skin="compu"] .queue__item::before,
+[data-skin="compu"] .queue__note {
+  font-family: inherit;
+  color: #404040;
+}
+
+[data-skin="compu"] .queue__name {
+  font-weight: 400;
+}
+
+[data-skin="compu"] .queue__artist {
+  color: #404040;
+}
+
+/* ---------- Salida ---------- */
+
+[data-skin="compu"] .devices {
+  padding: 3px;
+}
+
+[data-skin="compu"] .devices__header {
+  padding: 4px 2px;
+}
+
+[data-skin="compu"] .devices__refresh {
+  width: auto;
+  height: 22px;
+  margin: 0;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+[data-skin="compu"] .devices__refresh::after {
+  content: " Actualizar";
+  font-size: 11px;
+}
+
+[data-skin="compu"] .devices__panel {
+  padding: 2px;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: var(--win-sunken);
+}
+
+[data-skin="compu"] .devices__note {
+  color: #404040;
+}
+
+[data-skin="compu"] .devices__option {
+  border-radius: 0;
+  color: #000;
+}
+
+[data-skin="compu"] .devices__option:hover:not(:disabled) {
+  background: var(--win-select);
+  color: #fff;
+}
+
+[data-skin="compu"] .devices__option--active {
+  font-weight: 700;
+}
+
+[data-skin="compu"] .devices__type {
+  color: #404040;
+}
+
+[data-skin="compu"] .devices__option:hover:not(:disabled) .devices__type {
+  color: #fff;
+}
+
+/* El LED pasa a ser un botón de opción redondo, marcado en el que suena */
+[data-skin="compu"] .devices__led {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  box-shadow: inset 1px 1px 0 #808080, inset 2px 2px 0 #404040, inset -1px -1px 0 #e8e6e0;
+}
+
+[data-skin="compu"] .devices__option--active .devices__led {
+  background: radial-gradient(circle, #000 0 2.5px, #fff 3px);
+  box-shadow: inset 1px 1px 0 #808080, inset 2px 2px 0 #404040, inset -1px -1px 0 #e8e6e0;
+}
+
+[data-skin="compu"] .devices__led--busy {
+  background: radial-gradient(circle, #808080 0 2.5px, #fff 3px);
+}
+
+/* ---------- Pantalla de entrada ---------- */
+
+[data-skin="compu"] .login-screen {
+  padding: 20px;
+}
+
+[data-skin="compu"] .login-error {
+  border-radius: 0;
+  background: #ffffe1;
+  box-shadow: 0 0 0 1px #000;
+  color: #a00000;
+}

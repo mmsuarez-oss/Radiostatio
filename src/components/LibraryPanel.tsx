@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getAlbumTracks, type AlbumTrack } from "../spotify/library";
 import { LibraryShelf } from "./LibraryShelf";
 import { LibrarySearch } from "./LibrarySearch";
+import { AddToQueueButton } from "./Queue";
 import type { PlayerStyle } from "./StyleSwitcher";
 import { formatTime } from "../format";
 import "./LibraryPanel.css";
@@ -13,6 +14,8 @@ interface LibraryPanelProps {
   currentTrackUri: string;
   onSelectAlbum: (uri: string) => void;
   onSelectTrack: (trackUri: string, albumUri?: string) => void;
+  /** En el rack de la compu hay lugar: siempre abierta, sin plegar. */
+  alwaysOpen?: boolean;
 }
 
 export function LibraryPanel({
@@ -22,6 +25,7 @@ export function LibraryPanel({
   currentTrackUri,
   onSelectAlbum,
   onSelectTrack,
+  alwaysOpen = false,
 }: LibraryPanelProps) {
   const [tab, setTab] = useState<"tracks" | "albums" | "search">("tracks");
   const [tracks, setTracks] = useState<AlbumTrack[]>([]);
@@ -36,8 +40,8 @@ export function LibraryPanel({
   }, [albumUri]);
 
   return (
-    <details className="library-panel">
-      <summary className="library-panel__summary">
+    <details className={`library-panel ${alwaysOpen ? "library-panel--fixed" : ""}`} open={alwaysOpen || undefined}>
+      <summary className="library-panel__summary" onClick={alwaysOpen ? (e) => e.preventDefault() : undefined}>
         <span className="library-panel__summary-text">Biblioteca</span>
         <span className="library-panel__chevron" aria-hidden="true" />
       </summary>
@@ -79,18 +83,20 @@ export function LibraryPanel({
           {error && <p className="library-panel__empty">No se pudieron cargar las canciones</p>}
           {!error && tracks.length === 0 && <p className="library-panel__empty">Sin canciones todavía</p>}
           {tracks.map((track, i) => (
-            <button
-              key={track.uri}
-              className={`library-panel__track ${track.uri === currentTrackUri ? "library-panel__track--current" : ""}`}
-              onClick={() => onSelectTrack(track.uri)}
-            >
-              <span className="library-panel__track-num">{i + 1}</span>
-              <span className="library-panel__track-info">
-                <span className="library-panel__track-name">{track.name}</span>
-                <span className="library-panel__track-artist">{track.artists}</span>
-              </span>
-              <span className="library-panel__track-time">{formatTime(track.durationMs)}</span>
-            </button>
+            <div key={track.uri} className="track-row">
+              <button
+                className={`library-panel__track ${track.uri === currentTrackUri ? "library-panel__track--current" : ""}`}
+                onClick={() => onSelectTrack(track.uri)}
+              >
+                <span className="library-panel__track-num">{i + 1}</span>
+                <span className="library-panel__track-info">
+                  <span className="library-panel__track-name">{track.name}</span>
+                  <span className="library-panel__track-artist">{track.artists}</span>
+                </span>
+                <span className="library-panel__track-time">{formatTime(track.durationMs)}</span>
+              </button>
+              <AddToQueueButton uri={track.uri} />
+            </div>
           ))}
         </div>
       )}

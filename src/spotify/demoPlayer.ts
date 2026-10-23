@@ -21,7 +21,7 @@ const TRACKS = [
   { name: "Tema sin nombre", album: "Otro demo", hue: 320, duration: 167_000 },
 ];
 
-export async function createDemoPlayer(onStateChange: (state: NowPlaying) => void) {
+export async function createDemoPlayer(onStateChange: (state: NowPlaying) => void, _onError?: (message: string) => void) {
   let index = 0;
   let paused = false;
   let shuffle = false;
@@ -76,5 +76,7 @@ export async function createDemoPlayer(onStateChange: (state: NowPlaying) => voi
       shuffle = state;
       emit();
     },
+    playHere: async () => {},
+    disconnect: () => {},
   };
 }

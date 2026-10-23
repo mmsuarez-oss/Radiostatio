@@ -40,6 +40,15 @@
   transform: rotate(-135deg) translate(-2px, -2px);
 }
 
+/* En el rack no se pliega: el título queda como etiqueta, sin flecha */
+.library-panel--fixed .library-panel__summary {
+  cursor: default;
+}
+
+.library-panel--fixed .library-panel__chevron {
+  display: none;
+}
+
 .library-panel__tabs {
   display: flex;
   gap: 6px;

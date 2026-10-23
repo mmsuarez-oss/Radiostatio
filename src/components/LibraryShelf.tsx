@@ -11,9 +11,22 @@ interface LibraryShelfProps {
   items?: LibraryItem[];
 }
 
+type KindFilter = "all" | LibraryItem["kind"];
+
+const KINDS: { value: KindFilter; label: string }[] = [
+  { value: "all", label: "Todo" },
+  { value: "album", label: "Álbumes" },
+  { value: "playlist", label: "Playlists" },
+];
+
+// Sin tildes ni mayúsculas: "cancion" tiene que encontrar "Canción".
+const fold = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
 export function LibraryShelf({ style, onSelect, items: given }: LibraryShelfProps) {
   const [saved, setSaved] = useState<LibraryItem[]>([]);
   const [needsReconnect, setNeedsReconnect] = useState(false);
+  const [query, setQuery] = useState("");
+  const [kind, setKind] = useState<KindFilter>("all");
 
   useEffect(() => {
     if (given) return;
@@ -25,7 +38,15 @@ export function LibraryShelf({ style, onSelect, items: given }: LibraryShelfProp
       });
   }, [given]);
 
-  const items = given ?? saved;
+  const needle = fold(query.trim());
+  const items = given
+    ? given
+    : saved.filter(
+        // En los discos el subtítulo es el artista y sirve para buscar; en las playlists es "N canciones".
+        (item) =>
+          (kind === "all" || item.kind === kind) &&
+          fold(item.kind === "album" ? `${item.name} ${item.subtitle}` : item.name).includes(needle),
+      );
 
   if (needsReconnect) {
     return (
@@ -35,7 +56,8 @@ export function LibraryShelf({ style, onSelect, items: given }: LibraryShelfProp
     );
   }
 
-  if (items.length === 0) return null;
+  // Los resultados de búsqueda ya vienen filtrados; la biblioteca guardada lleva su propio filtro.
+  if (given ? items.length === 0 : saved.length === 0) return null;
 
   const itemClass =
     style === "cassette"
@@ -44,25 +66,58 @@ export function LibraryShelf({ style, onSelect, items: given }: LibraryShelfProp
         ? "library-shelf__item--square"
         : "library-shelf__item--disc";
 
-  return (
+  const shelf = (
     <div className={`library-shelf library-shelf--${style}`}>
       {items.map((item) => (
         <button
           key={item.uri}
-          className={`library-shelf__item ${itemClass}`}
+          className="library-shelf__entry"
           onClick={() => onSelect(item.uri)}
           title={`${item.name} — ${item.subtitle}`}
         >
-          {item.image && <img src={item.image} alt={item.name} />}
-          {style === "turntable" && <span className="library-shelf__hole" aria-hidden="true" />}
-          {style === "cassette" && (
-            <>
-              <span className="library-shelf__reel" aria-hidden="true" />
-              <span className="library-shelf__reel" aria-hidden="true" />
-            </>
-          )}
+          <span className={`library-shelf__item ${itemClass}`}>
+            {item.image && <img src={item.image} alt="" />}
+            {style === "turntable" && <span className="library-shelf__hole" aria-hidden="true" />}
+            {style === "cassette" && (
+              <>
+                <span className="library-shelf__reel" aria-hidden="true" />
+                <span className="library-shelf__reel" aria-hidden="true" />
+              </>
+            )}
+          </span>
+          <span className="library-shelf__name">{item.name}</span>
         </button>
       ))}
+    </div>
+  );
+
+  if (given) return shelf;
+
+  return (
+    <div className="library-shelf__saved">
+      <div className="library-shelf__filter">
+        <input
+          type="search"
+          className="library-shelf__search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Filtra tus discos y playlists"
+          aria-label="Filtrar biblioteca"
+        />
+        <div className="library-shelf__kinds" role="group" aria-label="Tipo">
+          {KINDS.map((option) => (
+            <button
+              key={option.value}
+              className={`library-shelf__kind ${kind === option.value ? "library-shelf__kind--active" : ""}`}
+              aria-pressed={kind === option.value}
+              onClick={() => setKind(option.value)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {items.length > 0 ? shelf : <p className="library-shelf__empty">No hay nada con ese nombre</p>}
     </div>
   );
 }
